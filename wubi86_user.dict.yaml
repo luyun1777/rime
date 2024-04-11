@@ -1,0 +1,20 @@
+# Rime dictionary: wubi86
+# encoding: utf-8
+
+---
+name: wubi86_user
+version: "2019-01-20"
+sort: original
+
+#use_preset_vocabulary: true # 是否引入【八股文】的词频词序
+
+...
+孑然一身	bqgt
+春花秋月	date
+云淡风轻	fiml
+圐圙	lllw
+风轻云淡	mlfi
+触手可及	qrse
+分组词条	wxyt
+wn.run/	wnml
+

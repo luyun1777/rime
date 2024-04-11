@@ -1,0 +1,115 @@
+# Rime schema settings
+# encoding: utf-8
+
+schema:
+  schema_id: wubi86
+  name: "五笔86"
+  version: "0.21"
+  author:
+    - 發明人 王永民先生
+  description: |
+    五筆字型86版
+    碼表源自 ibus-table
+    敲 z 鍵進入拼音反查
+  dependencies:
+    - pinyin_simp
+    - terra_pinyin
+
+switches:
+  - name: ascii_mode
+    states: [中文, 西文]
+    reset: 1
+  - name: zh_trad
+    reset: 0
+    states: [简体, 繁体]
+  - name: extended_charset
+    states: [常用, 增廣]
+    reset: 0
+
+engine:
+  processors:
+    - ascii_composer
+    - recognizer
+    - key_binder
+    - lua_processor@select_character
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - abc_segmentor
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - punct_translator
+    - reverse_lookup_translator
+    - table_translator
+    - lua_translator@date_translator
+    - lua_translator@lunar_translator
+    - lua_translator@calculator_translator
+    - lua_translator@unicode_translator
+    - lua_translator@number_translator
+    - history_translator@historyZ
+
+  filters:
+    - simplifier
+    - simplifier@tradition
+    - uniquifier
+    - lua_filter@single_char_first_filter
+    - lua_filter@reverse_lookup_filter
+    # - lua_filter@single_char_only
+    # - lua_filter@charset_filter
+    # - lua_filter@charset_comment_filter
+
+speller:
+  delimiter: " ;'"
+  max_code_length: 4
+  auto_select: true
+  auto_select_pattern: ^\w{4}$
+  auto_select_unique_candidate: true
+  auto_clear: max_length #manual|auto|max_length 空码按下一键确认清屏|空码自动清|达到最长码时后码顶上清屏
+
+translator:
+  dictionary: wubi86
+  max_phrase_length: 4
+  enable_completion: true # 逐键提示
+  enable_charset_filter: true # 开启字符集过滤
+  # 要开启造词，将以下四项设为true
+  enable_encoder: true # 自动造词
+  enable_sentence: false # 句子输入模式
+  encode_commit_history: false # 是否对已上屏词自动成词（仅 table_translator 有效）
+  enable_user_dict: false # 是否开启用户词典（用户词典记录动态字词频，用户词）
+  disable_user_dict_for_patterns:
+    - "^z.*$"
+    - "^[a-y]{1,3}$"
+
+historyZ:
+  input: z
+  size: 3 #重复前几次上屏
+  initial_quality: 1 #首选
+
+tradition:
+  opencc_config: s2tw.json # 簡 -> 臺灣標準
+  option_name: zh_trad
+
+reverse_lookup:
+  dictionary: pinyin_simp
+  prefix: "z"
+  suffix: "'"
+  tips: 〔拼音〕
+  preedit_format:
+    - xform/([nl])v/$1ü/
+    - xform/([nl])ue/$1üe/
+    - xform/([jqxy])v/$1u/
+
+punctuator:
+  import_preset: symbols
+
+key_binder:
+  import_preset: default
+
+recognizer:
+  import_preset: default
