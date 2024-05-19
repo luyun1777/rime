@@ -1,21 +1,28 @@
+---
 # Weasel settings
 # encoding: utf-8
-
 patch:
-  "style/color_scheme": brisk
-  "style/display_tray_icon": false
-  "style/font_face": "FiraCode Nerd Font Mono, 得意黑"
-  "style/font_point": 15
-  "style/horizontal": false
-  "style/inline_preedit": true
-  "style/layout/border_width": 1
-  "style/layout/candidate_spacing": 30
-  "style/layout/hilite_padding": 12
-  "style/layout/hilite_spacing": 2
-  "style/layout/margin_x": 12
-  "style/layout/margin_y": 10
-  "style/layout/min_height": 0
-  "style/layout/min_width": 100
-  "style/layout/round_corner": 4
-  "style/layout/spacing": 10
-  "style/window/@0/move": ""
+  style/color_scheme: brisk
+  style/display_tray_icon: false
+  style/font_face: FiraCode Nerd Font Mono, LXGW WenKai Mono
+  style/font_point: 15
+  style/horizontal: false
+  style/inline_preedit: true
+  style/layout/border_width: 1
+  style/layout/candidate_spacing: 30
+  style/layout/hilite_padding: 12
+  style/layout/hilite_spacing: 2
+  style/layout/margin_x: 12
+  style/layout/margin_y: 10
+  style/layout/min_height: 0
+  style/layout/min_width: 100
+  style/layout/round_corner: 4
+  style/layout/spacing: 10
+  style/window/@0/move: ''
+  app_options:
+    gvim.exe:
+      vim_mode: true  # require Weasel >=0.16.0
+    neovide.exe:
+      vim_mode: true
+    nvim-qt.exe:
+      vim_mode: true
