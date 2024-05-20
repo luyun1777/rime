@@ -2,7 +2,7 @@
 
 ## 简介
 
-方案：五笔86
+方案：五笔86，词库来源 [KyleBing](https://github.com/KyleBing/rime-wubi86-jidian)
 
 - 默认英文模式
 - 候选横排

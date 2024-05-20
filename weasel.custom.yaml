@@ -3,8 +3,9 @@
 # encoding: utf-8
 patch:
   style/color_scheme: brisk
+  style/color_scheme_dark: steam
   style/display_tray_icon: false
-  style/font_face: FiraCode Nerd Font Mono, LXGW WenKai Mono
+  style/font_face: LXGW WenKai Mono, FiraCode Nerd Font Mono
   style/font_point: 15
   style/horizontal: false
   style/inline_preedit: true

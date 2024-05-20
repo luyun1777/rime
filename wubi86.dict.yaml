@@ -5,9 +5,8 @@
 name: wubi86
 version: "4.3"
 sort: original # by_weight=权重 original=原始
-import_tables: # 此处是添加用户自定义词库的地方
-  - wubi86_user                   # 个人私有词库
-  - wubi86_extra                  # 扩展词库
+import_tables:
+  - wubi86_user
 
 columns:    # 码表格式
   - text    # 文字
@@ -1638,9 +1637,6 @@ encoder:
 蒎	aire
 萡	airf
 落后	airg
-AirPods	airp
-AirPods Pro	airp
-AirPower	airp
 落魄	airr
 菏	ais
 东西	aisg
@@ -2736,7 +2732,6 @@ AirPower	airp
 营火	apoo
 荧	apou
 营寨	appf
-Apple	appl
 劳军	appl
 蒙冤	appq
 劳神	appy
@@ -3858,7 +3853,7 @@ Apple	appl
 花蝶	awja
 巫师	awjg
 花旦	awjg
-工作日	awjj	30
+工作日	awjj
 节假日	awjj
 芥	awjj
 苍蝇	awjk
@@ -5966,7 +5961,6 @@ Apple	appl
 联考	buft
 陪玩	bugf
 耳闻不如目见	bugm
-B站	buh
 耳闻目睹	buhh
 耳闻目见	buhm
 障眼	buhv
@@ -7907,7 +7901,6 @@ B站	buh
 ↗	cojt
 ↘	cojt
 ↙	cojt
-	cokg	10	全角空格
 ⑴	coks
 ⑵	coks
 ⑶	coks
@@ -23042,7 +23035,6 @@ u	copu
 琬	gpqb
 正襟危坐	gpqw
 珍宝岛	gpqy
-GoPro	gpr
 不客气	gprn
 瑸	gprw
 列宁格勒	gpsa
@@ -24808,7 +24800,6 @@ GoPro	gpr
 頉	hdmy
 	hdqg
 凸面镜	hdqu
-HDR	hdr
 狊	hdu
 瞭	hdui
 睶	hdwj
@@ -28633,7 +28624,6 @@ HDR	hdr
 油区	imaq
 澧	imau
 淟	imaw
-IMAX	imax
 小册子	imbb
 测出	imbm
 没了	imbn
@@ -29103,7 +29093,6 @@ IMAX	imax
 没精打采	iore
 淡抹	iorg
 水煤气	iorn
-iOS	ios
 消火栓	iosw
 淡季	iotb
 消炎片	ioth
@@ -29125,7 +29114,6 @@ iOS	ios
 学工	ipaa
 浓荫	ipab
 学期	ipad
-iPad	ipad
 深藏	ipad
 掌鞭	ipaf
 沉落	ipai
@@ -29233,7 +29221,6 @@ iPad	ipad
 掌上	iphh
 学步	iphi
 学点	iphk
-iPhone	ipho
 深壑	iphp
 覚	iphq
 沉睡	ipht
@@ -29345,7 +29332,6 @@ iPhone	ipho
 学习	ipnu
 演习	ipnu
 掌心	ipny
-iPod	ipod
 学业	ipog
 浓烟	ipol
 沉迷	ipop
@@ -36357,7 +36343,6 @@ iPod	ipod
 吊带	kmgk
 哃	kmgk
 吊死	kmgq
-km/h	kmh
 吊	kmh
 吊	kmhj
 跋山涉水	kmii
@@ -40080,8 +40065,6 @@ km/h	kmh
 賤	maat
 曲子	mabb
 曲阳	mabj
-Macbook	macb
-macOS	maco
 曲	mad
 内蒙古自治区	mada
 嵌套	madd
@@ -40213,7 +40196,6 @@ macOS	maco
 邮局	mbnn
 邮发	mbnt
 邮戳	mbnw
-MacbookPro	mbp
 邮寄	mbpd
 邮包	mbqn
 邮报	mbrb
@@ -51186,7 +51168,7 @@ MacbookPro	mbp
 解压	qedf
 触感	qedg
 觭	qedk
-触碰	qedu	10	空格
+触碰	qedu
 触礁	qedw
 名胜古迹	qedy
 角膜	qeea
@@ -53467,7 +53449,6 @@ MacbookPro	mbp
 夤缘	qpxx
 鎺	qpyg
 多	qq
-QQ	qq
 金工	qqaa
 多项	qqad
 金牙	qqah
@@ -61450,7 +61431,6 @@ QQ	qq
 楔	sdh
 栫	sdhb
 楔	sdhd
-SD卡	sdhh
 顶上	sdhh
 椅桌	sdhj
 顶点	sdhk
@@ -68155,7 +68135,6 @@ SD卡	sdhh
 处心积虑	tnth
 自导自演	tnti
 物以稀为贵	tntk
-T恤	tntl
 秘	tntt
 知己知彼	tntt
 箳	tnua
@@ -69084,7 +69063,6 @@ T恤	tntl
 毛毛雨	ttfg
 笔直	ttfh
 筕	ttfh
-TF卡	ttfhh
 秊	ttfj
 筶	ttfk
 穳	ttfm
@@ -70405,7 +70383,6 @@ TF卡	ttfhh
 闻闻	ubub
 疗养	ubud
 逆差	ubud
-Ubuntu	ubun
 疗效	ubuq
 闻道	ubut
 癊	ubwc
@@ -73937,7 +73914,6 @@ Ubuntu	ubun
 立说	uuyu
 立论	uuyw
 立方	uuyy
-m³	uuyy	10	立方
 妆	uv
 兼营	uvap
 新婚燕尔	uvaq
@@ -78590,7 +78566,6 @@ m³	uuyy	10	立方
 倘	wimk
 僘	wimt
 分水岭	wimw
-Windows	wind
 信赏必罚	winl
 偿	wip
 偿	wipc
@@ -78906,7 +78881,7 @@ Windows	wind
 何罪之有	wlpd
 佃农	wlpe
 候车室	wlpg
-欲加之罪，何患无辞	wlpl	20	欲加之罪
+欲加之罪，何患无辞	wlpl	欲加之罪
 欲加之罪	wlpl
 保国安民	wlpn
 僆	wlpy
@@ -82012,7 +81987,6 @@ Windows	wind
 绌	xbmh
 絀	xbmh
 弛	xbn
-XBox	xbox
 红卫兵	xbrg
 经院哲学	xbri
 继承权	xbsc
@@ -87999,7 +87973,6 @@ XBox	xbox
 旗	ytaw
 放荒	ytay
 施	ytb
-YouTube	ytb
 旗子	ytbb
 诈取	ytbc
 州际	ytbf

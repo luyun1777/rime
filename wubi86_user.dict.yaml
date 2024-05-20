@@ -6,7 +6,7 @@ name: wubi86_user
 version: "2019-01-20"
 sort: original
 
-#use_preset_vocabulary: true # 是否引入【八股文】的词频词序
+use_preset_vocabulary: true # 是否引入【八股文】的词频词序
 
 ...
 孑然一身	bqgt
@@ -15,6 +15,43 @@ sort: original
 圐圙	lllw
 风轻云淡	mlfi
 触手可及	qrse
-分组词条	wxyt
 wn.run/	wnml
 
+众	cccc
+厽	cccc
+刕	cccc
+㐂	cccc
+孨	cccc
+品	cccc
+姦	cccc
+森	cccc
+歮	cccc
+鑫	cccc
+淼	cccc
+尛	cccc
+焱	cccc
+垚	cccc
+壵	cccc
+惢	cccc
+𡘙	cccc
+猋	cccc
+犇	cccc
+掱	cccc
+舙	cccc
+晶	cccc
+瞐	cccc
+𤾩	cccc
+皛	cccc
+畾	cccc
+磊	cccc
+毳	cccc
+鱻	cccc
+驫	cccc
+骉	cccc
+羴	cccc
+矗	cccc
+䆐	cccc
+飝	cccc
+龘	cccc
+麤	cccc
+叕	cccc
