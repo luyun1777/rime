@@ -1637,6 +1637,9 @@ encoder:
 蒎	aire
 萡	airf
 落后	airg
+AirPods	airp
+AirPods Pro	airp
+AirPower	airp
 落魄	airr
 菏	ais
 东西	aisg
@@ -2648,6 +2651,7 @@ encoder:
 蒙受	apep
 蒙脸	apew
 营地	apfb
+蔻	apfc
 劳动	apfc
 蓉城	apfd
 茔	apff
@@ -2732,6 +2736,7 @@ encoder:
 营火	apoo
 荧	apou
 营寨	appf
+Apple	appl
 劳军	appl
 蒙冤	appq
 劳神	appy
@@ -5961,6 +5966,7 @@ encoder:
 联考	buft
 陪玩	bugf
 耳闻不如目见	bugm
+B站	buh
 耳闻目睹	buhh
 耳闻目见	buhm
 障眼	buhv
@@ -7901,6 +7907,7 @@ encoder:
 ↗	cojt
 ↘	cojt
 ↙	cojt
+	cokg	全角空格
 ⑴	coks
 ⑵	coks
 ⑶	coks
@@ -23035,6 +23042,7 @@ u	copu
 琬	gpqb
 正襟危坐	gpqw
 珍宝岛	gpqy
+GoPro	gpr
 不客气	gprn
 瑸	gprw
 列宁格勒	gpsa
@@ -24800,6 +24808,7 @@ u	copu
 頉	hdmy
 	hdqg
 凸面镜	hdqu
+HDR	hdr
 狊	hdu
 瞭	hdui
 睶	hdwj
@@ -28624,6 +28633,7 @@ u	copu
 油区	imaq
 澧	imau
 淟	imaw
+IMAX	imax
 小册子	imbb
 测出	imbm
 没了	imbn
@@ -28692,7 +28702,6 @@ u	copu
 滑下	imgh
 游山玩水	imgi
 没理	imgj
-没事	imgk
 没事	imgk
 洞	imgk
 油画	imgl
@@ -29093,6 +29102,7 @@ u	copu
 没精打采	iore
 淡抹	iorg
 水煤气	iorn
+iOS	ios
 消火栓	iosw
 淡季	iotb
 消炎片	ioth
@@ -29114,6 +29124,7 @@ u	copu
 学工	ipaa
 浓荫	ipab
 学期	ipad
+iPad	ipad
 深藏	ipad
 掌鞭	ipaf
 沉落	ipai
@@ -29221,6 +29232,7 @@ u	copu
 掌上	iphh
 学步	iphi
 学点	iphk
+iPhone	ipho
 深壑	iphp
 覚	iphq
 沉睡	ipht
@@ -29332,6 +29344,7 @@ u	copu
 学习	ipnu
 演习	ipnu
 掌心	ipny
+iPod	ipod
 学业	ipog
 浓烟	ipol
 沉迷	ipop
@@ -36343,6 +36356,7 @@ u	copu
 吊带	kmgk
 哃	kmgk
 吊死	kmgq
+km/h	kmh
 吊	kmh
 吊	kmhj
 跋山涉水	kmii
@@ -40065,6 +40079,8 @@ u	copu
 賤	maat
 曲子	mabb
 曲阳	mabj
+Macbook	macb
+macOS	maco
 曲	mad
 内蒙古自治区	mada
 嵌套	madd
@@ -40196,6 +40212,7 @@ u	copu
 邮局	mbnn
 邮发	mbnt
 邮戳	mbnw
+MacbookPro	mbp
 邮寄	mbpd
 邮包	mbqn
 邮报	mbrb
@@ -48030,7 +48047,6 @@ u	copu
 军需品	pfkk
 宗兄	pfkq
 寒噤	pfks
-塞车	pflg
 赛车	pflg
 安魂曲	pfma
 守财	pfmf
@@ -51168,7 +51184,7 @@ u	copu
 解压	qedf
 触感	qedg
 觭	qedk
-触碰	qedu
+触碰	qedu	空格
 触礁	qedw
 名胜古迹	qedy
 角膜	qeea
@@ -53449,6 +53465,7 @@ u	copu
 夤缘	qpxx
 鎺	qpyg
 多	qq
+QQ	qq
 金工	qqaa
 多项	qqad
 金牙	qqah
@@ -59361,8 +59378,8 @@ u	copu
 手术室	rspg
 打穿	rspw
 打禅	rspy
-打昏	rsqa
 打错	rsqa
+打昏	rsqa
 打勾	rsqc
 打针	rsqf
 打印	rsqg
@@ -61431,6 +61448,7 @@ u	copu
 楔	sdh
 栫	sdhb
 楔	sdhd
+SD卡	sdhh
 顶上	sdhh
 椅桌	sdhj
 顶点	sdhk
@@ -65848,6 +65866,7 @@ u	copu
 行	tfhh
 街上	tfhh
 行止	tfhh
+TF卡	tfhh
 衠	tfhh
 徒步	tfhi
 选战	tfhk
@@ -68135,6 +68154,7 @@ u	copu
 处心积虑	tnth
 自导自演	tnti
 物以稀为贵	tntk
+T恤	tntl
 秘	tntt
 知己知彼	tntt
 箳	tnua
@@ -70383,6 +70403,7 @@ u	copu
 闻闻	ubub
 疗养	ubud
 逆差	ubud
+Ubuntu	ubun
 疗效	ubuq
 闻道	ubut
 癊	ubwc
@@ -73914,6 +73935,7 @@ u	copu
 立说	uuyu
 立论	uuyw
 立方	uuyy
+m³	uuyy	立方
 妆	uv
 兼营	uvap
 新婚燕尔	uvaq
@@ -78566,6 +78588,7 @@ u	copu
 倘	wimk
 僘	wimt
 分水岭	wimw
+Windows	wind
 信赏必罚	winl
 偿	wip
 偿	wipc
@@ -81987,6 +82010,7 @@ u	copu
 绌	xbmh
 絀	xbmh
 弛	xbn
+XBox	xbox
 红卫兵	xbrg
 经院哲学	xbri
 继承权	xbsc
@@ -84162,8 +84186,8 @@ u	copu
 维生	xwtg
 引体向上	xwth
 维和	xwtk
-纪念币	xwtm
 纵向	xwtm
+纪念币	xwtm
 纵身	xwtm
 给我	xwtr
 维系	xwtx
@@ -87973,6 +87997,7 @@ u	copu
 旗	ytaw
 放荒	ytay
 施	ytb
+YouTube	ytb
 旗子	ytbb
 诈取	ytbc
 州际	ytbf

@@ -1,7 +1,7 @@
 ﻿-- 来源 https://github.com/yanhuacuo/98wubi-tables > http://98wb.ysepan.com/
 -- 数字、金额大写
 
--- 触发前缀为 `R`
+-- 触发前缀为 任意大写字母(除U)
 local rv_var = "^[A-TV-Y]+[0-9]+$"
 
 local function splitNumPart(str)

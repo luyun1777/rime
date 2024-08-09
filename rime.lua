@@ -17,7 +17,7 @@ calculator_translator = require("calculator_translator")
 -- Unicode 內碼轉譯（輸出任意Unicode字符） `U` 触发  16 进制
 unicode_translator = require("unicode_translator")
 
--- 数字、金额大写
+-- 数字、金额大写 任意大写字母触发(除U)
 number_translator = require("number_translator")
 
 -- II. filters:

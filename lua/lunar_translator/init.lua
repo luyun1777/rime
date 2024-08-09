@@ -41,9 +41,9 @@ local function jq_translator(input, seg)
 end
 
 -- 农历查询
-local function queryLunar_translator(input, seg) --以任意大写字母开头引导反查农历日期，日期位数不足会以当前日期补全。
+local function queryLunar_translator(input, seg) --以任意大写字母(除R、U)开头引导反查农历日期，日期位数不足会以当前日期补全。
 	local str, lunar
-	if string.match(input, "^([A-TV-Y]+%d+)$") ~= nil then
+	if string.match(input, "^([A-QS-TV-Y]+%d+)$") ~= nil then
 		str = input:gsub("^(%a+)", "")
 		if string.match(str, "^(20)%d%d+$") ~= nil or string.match(str, "^(19)%d%d+$") ~= nil then
 			lunar = lunarDate.QueryLunarInfo(str)
