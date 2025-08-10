@@ -1,13 +1,21 @@
 local lunarDate = require("lunar_translator.lunarDate")
 local lunarGz = require("lunar_translator.lunarGz")
 local lunarJq = require("lunar_translator.lunarJq")
-
-local rv_var = { nl_var = "pedl", jq_var = "abrn" }
+local rv_var = {
+	nl_var = "nl", -- 输入当前农历关键字
+	jq_var = "jq", -- 输入节气关键字
+	nl_var_wubi86 = "pedl", -- 五笔输入当前农历关键字
+	jq_var_wubi86 = "abrn", -- 五笔输入节气关键字
+	nl_var_tiger = "lzvq", -- 虎码输入农历关键字
+	jq_var_tiger = "wtxs", -- 虎码输入节气关键字
+}
 
 -- 当前农历时间
-local function lunar_translator(input, seg)
-	local keyword = rv_var["nl_var"]
-	if input == rv_var["nl_var"] then
+local function lunar_translator(input, seg, env)
+	local schema_id = env.engine.schema.schema_id -- 获取方案id
+	local keyword = schema_id == "wubi86" and rv_var["nl_var_wubi86"]
+		or (schema_id == "tiger" and rv_var["nl_var_tiger"] or rv_var["nl_var"])
+	if input == keyword then
 		local t1, t2 = lunarDate.Date2LunarDate(os.date("%Y%m%d"))
 		local lunars = {
 			{ t1 .. JQtest(os.date("%Y%m%d")), "〔公历⇉农历〕" },
@@ -29,8 +37,12 @@ local function lunar_translator(input, seg)
 end
 
 -- 列出当年余下的节气
-local function jq_translator(input, seg)
-	local keyword = rv_var["jq_var"]
+local function jq_translator(input, seg, env)
+	local schema_id = env.engine.schema.schema_id -- 获取方案id
+	local keyword = schema_id == "wubi86" and rv_var["jq_var_wubi86"]
+		or (schema_id == "tiger" and rv_var["jq_var_tiger"] or rv_var["jq_var"])
+
+	-- local schema_name=env.engine.schema.schema_name         -- 获取方案名称
 	if input == keyword then
 		local jqs = lunarJq.GetNowTimeJq(os.date("%Y%m%d"))
 		for i = 1, #jqs do
@@ -56,9 +68,9 @@ local function queryLunar_translator(input, seg) --以任意大写字母(除R、
 	end
 end
 
-local function translator(input, seg)
-	lunar_translator(input, seg)
-	jq_translator(input, seg)
+local function translator(input, seg, env)
+	lunar_translator(input, seg, env)
+	jq_translator(input, seg, env)
 	queryLunar_translator(input, seg)
 end
 

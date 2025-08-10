@@ -4,11 +4,26 @@
 patch:
   schema_list:
     - { schema: wubi86 }
+    - { schema: tiger }
   "ascii_composer/switch_key/Shift_L": commit_code
   "ascii_composer/switch_key/Shift_R": commit_code
   "menu/page_size": 3
+  # "menu/alternative_select_labels": [㊀, ㊁, ㊂, ㊃, ㊄, ㊅, ㊆, ㊇, ㊈] # 自定义候选序号显示符，可自定修改，如要显示阿拉伯数字，直接注释掉这行（在前面加#号）
+  # 以下是备选样式（自行删除#号即可生效，只能生效一种）
+  #"menu/alternative_select_labels": [ ①,②,③,④,⑤,⑥,⑦,⑧,⑨,⑩ ]
+  #"menu/alternative_select_labels": [ ❶,❷,❸,❹,❺,❻,❼,❽,❾,❿ ]
+  #"menu/alternative_select_labels": [ ⓵,⓶,⓷,⓸,⓹,⓺,⓻,⓼,⓽,⓾ ]
+  #"menu/alternative_select_labels": [ ㊀,㊁,㊂,㊃,㊄,㊅,㊆,㊇,㊈,㊉ ]
+  #"menu/alternative_select_labels": [ ㈠,㈡,㈢,㈣,㈤,㈥,㈦,㈧,㈨,㈩ ]
+  #"menu/alternative_select_labels": [ 🀇,🀈,🀉,🀊,🀋,🀌,🀍,🀎,🀏,🀄 ]
+  #"menu/alternative_select_labels": [ Ⅰ,Ⅱ,Ⅲ,Ⅳ,Ⅴ,Ⅵ,Ⅶ,Ⅷ,Ⅸ,Ⅹ ]
+  #"menu/alternative_select_labels": [ ⅰ,ⅱ,ⅲ,ⅳ,ⅴ,ⅵ,ⅶ,ⅷ,ⅸ,ⅹ ]
+  #"menu/alternative_select_labels": [ Ⓐ,Ⓑ,Ⓒ,Ⓓ,Ⓔ,Ⓕ,Ⓖ,Ⓗ,Ⓘ,Ⓙ ]
+  #"menu/alternative_select_labels": [ ⓐ,ⓑ,ⓒ,ⓓ,ⓔ,ⓕ,ⓖ,ⓗ,ⓘ,ⓙ ]
   "switcher/hotkeys":
-    - "Control+1"
+    # - "Control+1"
+    - "Control+grave"
+    - Control+Shift+grave
   key_binder:
     bindings:
       # - {accept: comma, send: 2, when: has_menu}

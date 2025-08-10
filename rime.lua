@@ -16,7 +16,8 @@ calculator_translator = require("calculator_translator")
 
 -- Unicode 內碼轉譯（輸出任意Unicode字符） `U` 触发  16 进制
 unicode_translator = require("unicode_translator")
-
+-- 显示字符的unicode码
+unicode_display_filter = require("unicode_display")
 -- 数字、金额大写 任意大写字母触发(除U)
 number_translator = require("number_translator")
 
@@ -31,7 +32,8 @@ single_char_only = require("single_char_only")
 -- reverse_lookup_filter: 依地球拼音为候选项加上带调拼音的注释
 reverse_lookup_filter = require("reverse_lookup_filter")
 
--- charset_filter: 滤除含 CJK 扩展汉字的候选项
+-- charset_filter: 滤除含 非常用汉字的候选项
 -- charset_comment_filter: 为候选项加上其所属字符集的注释
-charset_filter = require("charset_filter").filter
-charset_comment_filter = require("charset_filter").comment_filter
+charset_filter = require("charset_filter")
+charset_comment_filter = require("charset_comment_filter")
+core2022 = require("core2022_filter") -- 自定义字集过滤

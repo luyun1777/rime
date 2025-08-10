@@ -31,4 +31,3 @@ local function unicode_translator(input, seg)
 end
 
 return unicode_translator
-

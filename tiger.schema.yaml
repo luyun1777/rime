@@ -2,23 +2,24 @@
 # encoding: utf-8
 
 schema:
-  schema_id: wubi86
-  name: "五笔86"
-  version: "0.21"
+  schema_id: tiger
+  name: "虎码"
+  version: 0.9
   author:
-    - 發明人 王永民先生
-  description: |
-    五筆字型86版
-    碼表源自 ibus-table
-    敲 z 鍵進入拼音反查
+    - {}
   dependencies:
     - pinyin_simp
     - terra_pinyin
+    - core2022
+
+  description: |
+    虎码
+    敲 ` 鍵進入拼音反查
 
 switches:
   - name: ascii_mode
-    states: [中文, 西文]
     reset: 1
+    states: [中文, 西文]
   - name: simplification
     reset: 0
     states: [简体, 繁体]
@@ -31,12 +32,15 @@ switches:
   # - name: extended_charset
   #   states: [常用, 增廣]
   #   reset: 0
-  # - name: extended_char #自定义字集
-  #   reset: 1
-  #   states: [全字集, 常用字]
+  - name: extended_char #自定义字集
+    reset: 1
+    states: [全字集, 常用字]
   - name: emoji_cn #emoji滤镜
     reset: 0
     states: [🈚, 🈶]
+  - name: chaifen
+    reset: 0
+    states: [拆隐, 拆显]
   - name: pinyin #拼音滤镜
     reset: 0
     states: [拼, pīn]
@@ -46,6 +50,21 @@ switches:
   - name: udpf_switch
     reset: 0
     states: [U编关, U编开]
+  #  - name: full_shape
+  #    states: [ 半角, 全角 ]
+  #  - name: extended_charset
+  #    states: [ 常用, 增廣 ]
+  #  - name: ascii_punct
+  #    states: [ 。，, ．， ]
+  # - options: [gbk, gb2312, utf8]
+  #   reset: 1
+  #   states:
+  #     - GBK
+  #     - GB2312
+  #     - UTF-8
+
+  - options: [_keyboard_default, _keyboard_defaultzj]
+    states: ["助记关", "助记开"]
 
 engine:
   processors:
@@ -73,16 +92,21 @@ engine:
     - lua_translator@calculator_translator
     - lua_translator@unicode_translator
     - lua_translator@number_translator
-    - history_translator@historyZ
-
   filters:
+    - lua_filter@core2022 #自定义字集过滤lua
     # - lua_filter@charset_filter #自定义字集过滤lua
     # - simplifier
     - simplifier@simplification
     - simplifier@tradition
     - simplifier@pinyin #拼音滤镜
+    - simplifier@chaifen #拆分滤镜
     - simplifier@emoji_cn #表情滤镜
     - lua_filter@single_char_only
+    # - charset_filter@gbk
+    # - charset_filter@utf8
+    # - charset_filter@gb2312
+    # - charset_filter@big5
+    # - reverse_lookup_filter@reverse_lookup
     - lua_filter@unicode_display_filter #lua unicode显示滤镜
     - lua_filter@single_char_first_filter
     - lua_filter@reverse_lookup_filter
@@ -90,41 +114,29 @@ engine:
     - uniquifier
 
 speller:
-  delimiter: " ;'"
-  max_code_length: 4
+  auto_clear: max_length
   auto_select: true
-  auto_select_pattern: ^\w{4}$
-  auto_select_unique_candidate: true
-  auto_clear: max_length #manual|auto|max_length 空码按下一键确认清屏|空码自动清|达到最长码时后码顶上清屏
+  max_code_length: 4
 
 translator:
-  dictionary: wubi86
+  dictionary: tiger
   max_phrase_length: 4
-  enable_completion: true # 逐键提示
-  enable_charset_filter: true # 开启字符集过滤
-  # 要开启造词，将以下四项设为true
-  enable_encoder: true # 自动造词
-  enable_sentence: false # 句子输入模式
-  encode_commit_history: false # 是否对已上屏词自动成词（仅 table_translator 有效）
-  enable_user_dict: false # 是否开启用户词典（用户词典记录动态字词频，用户词）
-  disable_user_dict_for_patterns:
-    - "^z.*$"
-    - "^[a-y]{1,3}$"
-
-historyZ:
-  input: z
-  size: 3 #重复前几次上屏
-  initial_quality: 1 #首选
+  enable_completion: true
+  enable_charset_filter: false
+  enable_encoder: true
+  enable_sentence: false
+  encode_commit_history: false
+  enable_user_dict: false
 
 reverse_lookup:
   dictionary: pinyin_simp
-  prefix: "z"
+  prefix: "`"
   suffix: "'"
-  tips: 〔拼音〕
+  tips: "〔拼音〕"
   preedit_format:
-    - xform/([nl])v/$1ü/
-    - xform/([nl])ue/$1üe/
-    - xform/([jqxy])v/$1u/
+    - "xform/([nl])v/$1ü/"
+    - "xform/([nl])ue/$1üe/"
+    - "xform/([jqxy])v/$1u/"
 
 punctuator:
   import_preset: symbols
@@ -139,10 +151,16 @@ key_binder:
     - { accept: "Control+i", toggle: emoji_cn, when: composing } # PC emoji开关
     - { accept: "Control+u", toggle: charset_comment_filter, when: composing } # PC Unicode分区开关
     - { accept: "Control+y", toggle: udpf_switch, when: composing } #PC Unicode编码开关
-    # - { accept: "Control+h", toggle: extended_char, when: composing } # PC 自定字集开关
+    - { accept: "Control+h", toggle: extended_char, when: composing } # PC 自定字集开关
+    # - { accept: "Control+h", toggle: extended_charset, when: composing }
     # - { accept: "Control+Shift+H", toggle: extended_char, when: composing } # PC 自定字集开关2
+    - { accept: "Control+j", toggle: chaifen, when: composing } # PC 拆分滤镜开关
+
 recognizer:
   import_preset: default
+  patterns:
+    punct: "^/([0-9]0?|[A-Za-z]+)$"
+    reverse_lookup: "^`[a-z]*'?$"
 
 # ↓简繁(+部分异体)滤镜
 simplification: #⇩四选一
@@ -163,6 +181,7 @@ emoji_cn:
   opencc_config: emoji.json
   option_name: emoji_cn
   tips: all
+
 # ↓拼音滤镜
 pinyin:
   opencc_config: pinyin.json
@@ -176,6 +195,20 @@ pinyin:
   tips: all
   tags:
     - abc
-    # - wubi
-    - wubi86
+    - tiger
+    - tigress
     # - reverse_lookup
+
+# 拆分滤镜
+chaifen:
+  opencc_config: hu_cf.json
+  option_name: chaifen
+  show_in_comment: true
+  comment_format:
+    - "xform/&nbsp;/ /"
+  tags:
+    - abc
+    - tiger
+    - tigress
+    - reverse_lookup
+  tips: all #如只想给单字加滤镜，可改为 char
