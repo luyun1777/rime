@@ -4,8 +4,10 @@ local lunarJq = require("lunar_translator.lunarJq")
 local rv_var = {
 	nl_var = "nl", -- 输入当前农历关键字
 	jq_var = "jq", -- 输入节气关键字
-	nl_var_wubi86 = "pedl", -- 五笔输入当前农历关键字
-	jq_var_wubi86 = "abrn", -- 五笔输入节气关键字
+	nl_var_wubi86 = "pedl", -- 五笔86输入当前农历关键字
+	jq_var_wubi86 = "abrn", -- 五笔86输入节气关键字
+	nl_var_wubi98 = "pede", -- 五笔98输入当前农历关键字
+	jq_var_wubi98 = "abrt", -- 五笔98输入节气关键字
 	nl_var_tiger = "lzvq", -- 虎码输入农历关键字
 	jq_var_tiger = "wtxs", -- 虎码输入节气关键字
 }
@@ -14,6 +16,7 @@ local rv_var = {
 local function lunar_translator(input, seg, env)
 	local schema_id = env.engine.schema.schema_id -- 获取方案id
 	local keyword = schema_id == "wubi86" and rv_var["nl_var_wubi86"]
+		or (schema_id == "wubi98" and rv_var["nl_var_wubi98"])
 		or (schema_id == "tiger" and rv_var["nl_var_tiger"] or rv_var["nl_var"])
 	if input == keyword then
 		local t1, t2 = lunarDate.Date2LunarDate(os.date("%Y%m%d"))
@@ -40,6 +43,7 @@ end
 local function jq_translator(input, seg, env)
 	local schema_id = env.engine.schema.schema_id -- 获取方案id
 	local keyword = schema_id == "wubi86" and rv_var["jq_var_wubi86"]
+		or (schema_id == "wubi98" and rv_var["jq_var_wubi98"])
 		or (schema_id == "tiger" and rv_var["jq_var_tiger"] or rv_var["jq_var"])
 
 	-- local schema_name=env.engine.schema.schema_name         -- 获取方案名称

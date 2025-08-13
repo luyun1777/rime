@@ -50,12 +50,14 @@ switches:
   - name: udpf_switch
     reset: 0
     states: [U编关, U编开]
-  #  - name: full_shape
-  #    states: [ 半角, 全角 ]
+  - name: full_shape
+    states: [半, 全]
+    reset: 0
+  - name: ascii_punct
+    states: ["。，", "．，"]
+    reset: 0
   #  - name: extended_charset
   #    states: [ 常用, 增廣 ]
-  #  - name: ascii_punct
-  #    states: [ 。，, ．， ]
   # - options: [gbk, gb2312, utf8]
   #   reset: 1
   #   states:
@@ -115,7 +117,7 @@ engine:
 
 speller:
   auto_clear: max_length
-  auto_select: true
+  auto_select: false
   max_code_length: 4
 
 translator:
