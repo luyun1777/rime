@@ -9,11 +9,11 @@ schema:
     - 發明人 王永民先生
   description: |
     五筆字型86版
-    碼表源自 ibus-table
     敲 z 鍵進入拼音反查
   dependencies:
     - pinyin_simp
     - terra_pinyin
+    - core2022
 
 switches:
   - name: ascii_mode
@@ -31,16 +31,19 @@ switches:
   # - name: extended_charset
   #   states: [常用, 增廣]
   #   reset: 0
-  # - name: extended_char #自定义字集
-  #   reset: 1
-  #   states: [全字集, 常用字]
-  - name: emoji_cn #emoji滤镜
+  - name: extended_char # 自定义字集
+    reset: 1
+    states: [全字集, 常用字]
+  - name: chaifen
+    reset: 0
+    states: [拆隐, 拆显]
+  - name: emoji_cn # emoji滤镜
     reset: 0
     states: [🈚, 🈶]
-  - name: pinyin #拼音滤镜
+  - name: pinyin # 拼音滤镜
     reset: 0
     states: [拼, pīn]
-  - name: charset_comment_filter #字符集提示
+  - name: charset_comment_filter # 字符集提示
     reset: 0
     states: [U区关, U区开]
   - name: udpf_switch
@@ -76,32 +79,37 @@ engine:
     - history_translator@historyZ
 
   filters:
-    # - lua_filter@charset_filter #自定义字集过滤lua
+    - lua_filter@core2022 # 自定义字集过滤lua
+    # - lua_filter@charset_filter # 自定义字集过滤lua
     # - simplifier
     - simplifier@simplification
     - simplifier@tradition
-    - simplifier@pinyin #拼音滤镜
-    - simplifier@emoji_cn #表情滤镜
+    - simplifier@pinyin # 拼音滤镜
+    - simplifier@chaifen # 拆分滤镜
+    - simplifier@emoji_cn # 表情滤镜
     - lua_filter@single_char_only
-    - lua_filter@unicode_display_filter #lua unicode显示滤镜
+    - lua_filter@unicode_display_filter # lua unicode显示滤镜
     - lua_filter@single_char_first_filter
     - lua_filter@reverse_lookup_filter
     - lua_filter@charset_comment_filter
     - uniquifier
 
 speller:
-  delimiter: " ;'"
   max_code_length: 4
-  auto_select: true
+  auto_select: false
   auto_select_pattern: ^\w{4}$
-  auto_select_unique_candidate: true
-  auto_clear: max_length #manual|auto|max_length 空码按下一键确认清屏|空码自动清|达到最长码时后码顶上清屏
+  auto_clear: max_length # manual|auto|max_length 空码按下一键确认清屏|空码自动清|达到最长码时后码顶上清屏
+  algebra:  # 万能z键拼写处理，z符号匹配任意字符
+    - derive/^(...).$/$1z/
+    - derive/^(..).(.*)$/$1z$2/
+    - derive/^(.).(.*)$/$1z$2/
+    # - derive/^.(.*)$/z$1/  # 开启本行将与z键重复上屏冲突
 
 translator:
   dictionary: wubi86
   max_phrase_length: 4
   enable_completion: true # 逐键提示
-  enable_charset_filter: true # 开启字符集过滤
+  enable_charset_filter: false # 开启字符集过滤
   # 要开启造词，将以下四项设为true
   enable_encoder: true # 自动造词
   enable_sentence: false # 句子输入模式
@@ -113,8 +121,8 @@ translator:
 
 historyZ:
   input: z
-  size: 3 #重复前几次上屏
-  initial_quality: 1 #首选
+  size: 3 # 重复前几次上屏
+  initial_quality: 1 # 首选
 
 reverse_lookup:
   dictionary: pinyin_simp
@@ -138,20 +146,21 @@ key_binder:
     - { accept: "Control+p", toggle: pinyin, when: composing } # PC 拼音开关
     - { accept: "Control+i", toggle: emoji_cn, when: composing } # PC emoji开关
     - { accept: "Control+u", toggle: charset_comment_filter, when: composing } # PC Unicode分区开关
-    - { accept: "Control+y", toggle: udpf_switch, when: composing } #PC Unicode编码开关
-    # - { accept: "Control+h", toggle: extended_char, when: composing } # PC 自定字集开关
+    - { accept: "Control+y", toggle: udpf_switch, when: composing } # PC Unicode编码开关
+    - { accept: "Control+h", toggle: extended_char, when: composing } # PC 自定字集开关
     # - { accept: "Control+Shift+H", toggle: extended_char, when: composing } # PC 自定字集开关2
+    - { accept: "Control+j", toggle: chaifen, when: composing } # PC 拆分滤镜开关
 recognizer:
   import_preset: default
 
 # ↓简繁(+部分异体)滤镜
-simplification: #⇩四选一
+simplification: # ⇩四选一
   opencc_config: st_tu.json # 简 ➡ 繁·异（秃版标准）
   # opencc_config: s2tw.json # 简 ➡ 台湾正体
   # opencc_config: s2hk.json    # 简 ➡ 香港繁体
   # opencc_config: s2twp.json  # 简 ➡ 台湾正体（含常用词汇如：软体→軟體、鼠标→滑鼠）
   option_name: simplification
-  tips: all #all字词|char字
+  tips: all # all字词|char字
 # ↓繁简滤镜
 tradition:
   opencc_config: t2s.json #  繁-> 简
@@ -174,8 +183,10 @@ pinyin:
     - "xform/（//"
     - "xform/）//"
   tips: all
-  tags:
-    - abc
-    # - wubi
-    - wubi86
-    # - reverse_lookup
+chaifen:
+  opencc_config: wb86_cf.json
+  option_name: chaifen
+  show_in_comment: true
+  comment_format:
+    - "xform/&nbsp;/ /"
+  tips: all # 只给单字加滤镜，改为 char 。 词也显示，改为 all

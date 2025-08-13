@@ -3,6 +3,7 @@
 
 patch:
   schema_list:
+    - { schema: wubi98 }
     - { schema: wubi86 }
     - { schema: tiger }
   "ascii_composer/switch_key/Shift_L": commit_code
