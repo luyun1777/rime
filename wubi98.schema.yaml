@@ -13,7 +13,7 @@ schema:
   dependencies:
     - pinyin_simp
     - terra_pinyin
-    - core2022
+    - core8105
 
 switches:
   - name: ascii_mode
@@ -28,10 +28,7 @@ switches:
   - name: single_char_only
     reset: 0
     states: [词, 单]
-  # - name: extended_charset
-  #   states: [常用, 增廣]
-  #   reset: 0
-  - name: extended_char # 自定义字集
+  - name: charset_filter # 自定义字集
     reset: 1
     states: [全字集, 常用字]
   - name: chaifen
@@ -85,7 +82,7 @@ engine:
     - history_translator@historyZ
 
   filters:
-    - lua_filter@core2022 # 自定义字集过滤lua
+    - lua_filter@core8105 # 自定义字集过滤lua
     # - lua_filter@charset_filter # 自定义字集过滤lua
     # - simplifier
     - simplifier@simplification
@@ -105,7 +102,7 @@ speller:
   auto_select: false
   auto_select_pattern: ^\w{4}$
   auto_clear: max_length # manual|auto|max_length 空码按下一键确认清屏|空码自动清|达到最长码时后码顶上清屏
-  algebra:  # 万能z键拼写处理，z符号匹配任意字符
+  algebra: # 万能z键拼写处理，z符号匹配任意字符
     - derive/^(...).$/$1z/
     - derive/^(..).(.*)$/$1z$2/
     - derive/^(.).(.*)$/$1z$2/
@@ -153,8 +150,7 @@ key_binder:
     - { accept: "Control+i", toggle: emoji_cn, when: composing } # PC emoji开关
     - { accept: "Control+u", toggle: charset_comment_filter, when: composing } # PC Unicode分区开关
     - { accept: "Control+y", toggle: udpf_switch, when: composing } # PC Unicode编码开关
-    - { accept: "Control+h", toggle: extended_char, when: composing } # PC 自定字集开关
-    # - { accept: "Control+Shift+H", toggle: extended_char, when: composing } # PC 自定字集开关2
+    - { accept: "Control+h", toggle: charset_filter, when: composing } # PC 自定字集开关
     - { accept: "Control+j", toggle: chaifen, when: composing } # PC 拆分滤镜开关
 recognizer:
   import_preset: default

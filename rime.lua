@@ -36,4 +36,4 @@ reverse_lookup_filter = require("reverse_lookup_filter")
 -- charset_comment_filter: 为候选项加上其所属字符集的注释
 charset_filter = require("charset_filter")
 charset_comment_filter = require("charset_comment_filter")
-core2022 = require("core2022_filter") -- 自定义字集过滤
+core8105 = require("core8105_filter") -- 自定义字集过滤

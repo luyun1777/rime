@@ -1,38 +1,47 @@
 ﻿-- 以词定字
 -- 原脚本 https://github.com/BlindingDark/rime-lua-select-character
-
 local select = {}
 
 function select.init(env)
 	local config = env.engine.schema.config
-	select.first_key = config:get_string("key_binder/select_first_character") or "bracketleft"
-	select.last_key = config:get_string("key_binder/select_last_character") or "bracketright"
+	env.first_key = config:get_string("key_binder/select_first_character") or "bracketleft"
+	env.last_key = config:get_string("key_binder/select_last_character") or "bracketright"
 end
 
 function select.func(key, env)
 	local engine = env.engine
 	local context = env.engine.context
 
-	if
-		not key:release()
-		and (context:is_composing() or context:has_menu())
-		and (select.first_key or select.last_key)
-	then
-		local text = context.input
-		if context:get_selected_candidate() then
-			text = context:get_selected_candidate().text
+	if not key:release() and (context:is_composing() or context:has_menu()) and (env.first_key or env.last_key) then
+		local input = context.input
+		local selected_candidate = context:get_selected_candidate()
+		selected_candidate = selected_candidate and selected_candidate.text or input
+
+		local selected_char
+		if key:repr() == env.first_key then
+			selected_char = selected_candidate:sub(1, utf8.offset(selected_candidate, 2) - 1)
+		elseif key:repr() == env.last_key then
+			selected_char = selected_candidate:sub(utf8.offset(selected_candidate, -1))
+		else
+			return 2
 		end
-		if utf8.len(text) > 1 then
-			if key:repr() == select.first_key then
-				engine:commit_text(text:sub(1, utf8.offset(text, 2) - 1))
-				context:clear()
-				return 1
-			elseif key:repr() == select.last_key then
-				engine:commit_text(text:sub(utf8.offset(text, -1)))
-				context:clear()
-				return 1
-			end
+
+		local commit_text = context:get_commit_text()
+		local _, end_pos = commit_text:find(selected_candidate)
+		local caret_pos = context.caret_pos
+
+		local part1 = commit_text:sub(1, end_pos):gsub(selected_candidate, selected_char)
+		local part2 = commit_text:sub(end_pos + 1)
+
+		engine:commit_text(part1)
+		context:clear()
+		if caret_pos ~= #input then
+			part2 = part2 .. input:sub(caret_pos + 1)
 		end
+		if part2 ~= "" then
+			context:push_input(part2)
+		end
+		return 1
 	end
 	return 2
 end

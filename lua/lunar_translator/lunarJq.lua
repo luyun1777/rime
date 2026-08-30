@@ -1,5 +1,5 @@
 ﻿------------------------------------
-------wirting by 98wubi Group-------
+------writing by 98wubi Group-------
 ------http://98wb.ys168.com/--------
 ------------------------------------
 
@@ -2286,7 +2286,7 @@ local jqB = { --节气表
 	"惊蛰",
 }
 
-function JQtest(y) --节气使计算范例,y是年分,这是个测试函数
+function M.JQtest(y) --节气使计算范例,y是年分,这是个测试函数
 	local q, s1
 	y = tostring(y)
 	local jd = 365.2422 * (tonumber(y.sub(y, 1, 4)) - 2000)
