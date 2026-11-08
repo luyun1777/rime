@@ -20,20 +20,20 @@
 
 ### 1. 快捷键
 
-| 快捷键                                                       | 功能                                                         |
-| :----------------------------------------------------------- | :----------------------------------------------------------- |
-| <kbd>ctrl</kbd> + <kbd>grave</kbd> \| <kbd>ctrl</kbd> + <kbd>shift</kbd> + <kbd>grave</kbd> | 菜单项, `grave`表示<kbd>`</kbd>键                            |
-| <kbd>ctrl</kbd> + <kbd>.</kbd>                               | 中英文标点切换                                               |
-| <kbd>shift</kbd> + <kbd>space</kbd>                          | 全角半角切换                                                 |
-| <kbd>ctrl</kbd> + <kbd>u</kbd>                               | 字符分区提示与隐藏                                           |
-| <kbd>ctrl</kbd> + <kbd>o</kbd>                               | 简体转繁体切换                                               |
-| <kbd>ctrl</kbd> + <kbd>shift</kbd> + <kbd>O</kbd>            | 繁体转简体切换                                               |
-| <kbd>ctrl</kbd> + <kbd>h</kbd>                               | [自定义字集过滤](https://github.com/iDvel/rime-ice/blob/main/cn_dicts/8105.dict.yaml) |
-| <kbd>ctrl</kbd> + <kbd>d</kbd>                               | 字词开关                                                     |
-| <kbd>ctrl</kbd> + <kbd>j</kbd>                               | 拆分显示与隐藏                                               |
-| <kbd>ctrl</kbd> + <kbd>p</kbd>                               | 拼音（词组）反查                                             |
-| <kbd>ctrl</kbd> + <kbd>i</kbd>                               | emoji开关                                                    |
-| <kbd>ctrl</kbd> + <kbd>y</kbd>                               | 显示单字的Unicode编码开关                                    |
+| 快捷键                                                                                      | 功能                                                                                  |
+| :------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------ |
+| <kbd>ctrl</kbd> + <kbd>grave</kbd> \| <kbd>ctrl</kbd> + <kbd>shift</kbd> + <kbd>grave</kbd> | 菜单项, `grave`表示<kbd>`</kbd>键                                                     |
+| <kbd>ctrl</kbd> + <kbd>.</kbd>                                                              | 中英文标点切换                                                                        |
+| <kbd>shift</kbd> + <kbd>space</kbd>                                                         | 全角半角切换                                                                          |
+| <kbd>ctrl</kbd> + <kbd>u</kbd>                                                              | 字符分区提示与隐藏                                                                    |
+| <kbd>ctrl</kbd> + <kbd>o</kbd>                                                              | 简体转繁体切换                                                                        |
+| <kbd>ctrl</kbd> + <kbd>shift</kbd> + <kbd>O</kbd>                                           | 繁体转简体切换                                                                        |
+| <kbd>ctrl</kbd> + <kbd>h</kbd>                                                              | [自定义字集过滤](https://github.com/iDvel/rime-ice/blob/main/cn_dicts/8105.dict.yaml) |
+| <kbd>ctrl</kbd> + <kbd>d</kbd>                                                              | 字词开关                                                                              |
+| <kbd>ctrl</kbd> + <kbd>j</kbd>                                                              | 拆分显示与隐藏                                                                        |
+| <kbd>ctrl</kbd> + <kbd>p</kbd>                                                              | 拼音（词组）反查                                                                      |
+| <kbd>ctrl</kbd> + <kbd>i</kbd>                                                              | emoji开关                                                                             |
+| <kbd>ctrl</kbd> + <kbd>y</kbd>                                                              | 显示单字的Unicode编码开关                                                             |
 
 > 默认以地球拼音反查显示单字的读音，若要显示词组的读音，可使用快捷键<kbd>ctrl</kbd>+<kbd>p</kbd>（使用opencc配置）
 >
@@ -52,13 +52,15 @@
 
 1. 以`U` 开头输入任意 Unicode 字符
 
-2. 以除`U` 外的任意大写字母开头将小写数字转化为中文大写数字，并可以进行公历、农历查询
+2. 以`R` 开头将小写数字转化为中文大写数字
 
-3. 以词定字：`[` 选择词的首字，`]` 选中词的末字
+3. 以`N`开头进行农历反查
 
-4. 以`=` 开头可用做临时计算器
+4. 以词定字：`[` 选择词的首字，`]` 选中词的末字
 
-5. 输出统 `时间`、`日期` 、`星期`、`农历`和`节气`
+5. 以`=` | `V` 开头可用做临时计算器
+
+6. 输出统 `时间`、`日期` 、`星期`、`农历`和`节气`
 
 | 编码                            | 说明               |
 | ------------------------------- | ------------------ |

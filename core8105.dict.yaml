@@ -1,10 +1,3 @@
-###表內有的字纔會輸出，可自己添加，格式如下
-name: core8105
-version: "2025.06.18"
-sort: original
-use_preset_vocabulary: false
-...
-
 # Rime dictionary
 # encoding: utf-8
 #
@@ -14,7 +7,9 @@ use_preset_vocabulary: false
 # 使用的字频：[25亿字语料汉字字频表](https://faculty.blcu.edu.cn/xinghb/zh_CN/article/167473/content/1437.htm)
 ---
 name: 8105
-
+version: "2026-08-16"
+sort: original
+...
 ### 扩展，不在《通用规范汉字表》的字:
 𤭢	t
 揞	t
@@ -82,7 +77,6 @@ name: 8105
 氼	t
 烎	t
 
-### 字表
 啊	t
 阿	t
 吖	t
@@ -7355,6 +7349,7 @@ name: 8105
 悠	t
 诱	t
 幼	t
+唷	t
 哟	t
 佑	t
 邮	t
