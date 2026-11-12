@@ -93,7 +93,7 @@ engine:
     - simplifier@emoji_cn # 表情滤镜
     - lua_filter@single_char_only
     - lua_filter@unicode_display_filter # lua unicode显示滤镜
-    - lua_filter@single_char_first_filter
+    # - lua_filter@single_char_first_filter
     - lua_filter@reverse_lookup_filter
     - lua_filter@charset_comment_filter
     - uniquifier
