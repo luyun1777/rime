@@ -76,10 +76,12 @@ engine:
     - table_translator
     - lua_translator@date_translator
     - lua_translator@lunar_translator
+    - lua_translator@*shijian_translator
     - lua_translator@calculator_translator
     - lua_translator@*super_calculator
     - lua_translator@unicode_translator
-    - lua_translator@number_translator
+    # - lua_translator@number_translator
+    - lua_translator@*number_conversion
     - history_translator@historyZ
 
   filters:
