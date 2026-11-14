@@ -1954,7 +1954,7 @@ end
 -- 候选只从已经通过对应转换核心验证的数据生成，避免先拼出非法日期文本再补救。
 local function QueryLunarInfo(env, date)
   local config = env.engine.schema.config
-  local result = {}
+  local candidates = {}
   local parsed = parse_n_date_input(date)
   local status = {
     parsed = parsed ~= nil,
@@ -1965,7 +1965,7 @@ local function QueryLunarInfo(env, date)
   }
 
   if not parsed then
-    return result, status
+    return candidates, status
   end
 
   -- 三种语义各自交给自己的转换核心判断是否合法。
@@ -1988,33 +1988,38 @@ local function QueryLunarInfo(env, date)
         local format_str = custom_formats:get_value_at(i - 1):get_string()
         local formatted_date = format_dt({ year = y, month = m, day = d }, format_str)
         if formatted_date and formatted_date ~= '' then
-          result[#result + 1] = { formatted_date, '' }
+          candidates[#candidates + 1] = { formatted_date, '' }
         end
       end
     else
-      result = {
-        { string.format('%04d年%02d月%02d日', y, m, d), '' },
-        { string.format('%04d.%02d.%02d', y, m, d), '' },
-        { string.format('%04d-%02d-%02d', y, m, d), '' },
-        { string.format('%04d/%02d/%02d', y, m, d), '' },
-        { string.format('%d年%d月%d日', y, m, d), '' },
-        { string.format('%d月%d日', m, d), '' },
+      local week_no = os.date('%w', os.time({ year = y, month = m, day = d, hour = parsed.hour }))
+      candidates = {
+        { string.format('%d年%d月%d日', y, m, d), '〔日期〕' },
+        { chinese_weekday2(week_no), '〔星期〕' },
+        { gregorian_info.text, '〔公历⇉农历〕' },
+        { lunarJzl(parsed.ymdh), '〔公历⇉农历〕' },
+        { Date2LunarDate(parsed.ymd) .. GetLunarSichen(parsed.hour, 1), '〔公历⇉农历〕' },
+        { CnDate_translator(parsed.ymd), '〔日期〕' },
       }
+      local human_day, human_week = human_relative_date(y, m, d)
+      if human_day then
+        table.insert(candidates, 3, { human_day, '' })
+      end
+      if human_week then
+        table.insert(candidates, 4, { human_day, '' })
+      end
     end
-
-    result[#result + 1] = { gregorian_info.text, '' }
-    result[#result + 1] = { lunarJzl(parsed.ymdh), '' }
   end
 
   -- 农历 -> 公历与公历合法性无关：普通月、闰月分别由结构化农历核心验证。
   if normal_date_info then
-    result[#result + 1] = { normal_date_info.text, '' }
+    candidates[#candidates + 1] = { normal_date_info.text, '〔农历⇉公历〕' }
   end
   if leap_date_info then
-    result[#result + 1] = { leap_date_info.text .. '（闰）', '〔农历⇉公历〕' }
+    candidates[#candidates + 1] = { leap_date_info.text .. '（闰）', '〔农历⇉公历〕' }
   end
 
-  return result, status
+  return candidates, status
 end
 
 -- 万象新增三伏天计算函数
@@ -2589,7 +2594,7 @@ local function translator(input, seg, env)
 
         if is_valid_gregorian_date(y1, m1, d1) and is_valid_gregorian_date(y2, m2, d2) then
           local diff = math.abs(gregorian_ordinal(y2, m2, d2) - gregorian_ordinal(y1, m1, d1))
-          generate_candidates(input, 'shijian', seg, { { tostring(diff) .. '天', '' } })
+          generate_candidates(input, 'shijian', seg, { { tostring(diff) .. '天', '〔日期差〕' } })
         else
           set_segment_prompt(context, ' 〔日期不存在〕')
         end
@@ -2615,30 +2620,20 @@ local function translator(input, seg, env)
 
           local mm_str = string.format('%02d', mm)
           local dd_str = string.format('%02d', dd)
-          local date_str = yr .. mm_str .. dd_str .. '01'
+          local date_str = yr .. mm_str .. dd_str .. os.date('%H')
           local lunar = QueryLunarInfo(env, date_str)
 
+          local candidates = {
+            { string.format('%d月%d日', mm, dd), '〔日期〕' },
+          }
           if #lunar > 0 then
-            local candidates = {
-              { string.format('%d月%d日', mm, dd), '' },
-              { string.format('%02d月%02d日', mm, dd), '' },
-            }
-            local human_day, human_week = human_relative_date(tonumber(yr), mm, dd)
-            if human_day then
-              table.insert(candidates, { human_day, '' })
-            end
-            if human_week then
-              table.insert(candidates, { human_week, '' })
-            end
             for _, cand in ipairs(lunar) do
               local text = cand[1]
-              if not text:match('%d') then
-                if text:find('%b()') then
-                  text = text:gsub('%b()', '')
-                end
-                local processed = text:match('年(.+)') or text
-                table.insert(candidates, { processed, '' })
+              if text:find('（.-）') then
+                text = text:gsub('（.-）', '', 1)
               end
+              local processed = text:match('年(.+)') or text
+              candidates[#candidates + 1] = { processed, cand[2] }
             end
             generate_candidates(input, 'shijian', seg, candidates)
             handled = true
@@ -2648,8 +2643,14 @@ local function translator(input, seg, env)
       -- NYYYY...：以 19/20 开头的年份（N2025 / N20250101 / N2025010101）
       -- 提示“日期不存在”仅在长度 >= 8（yyyyMMdd）时进行
       if not handled and (n:match('^20%d%d') or n:match('^19%d%d')) then
-        local lunar, status = QueryLunarInfo(env, n)
+        if len == 4 then
+          n = n .. os.date('%m%d')
+        end
+        if len == 6 then
+          n = n .. os.date('%d')
+        end
 
+        local lunar, status = QueryLunarInfo(env, n)
         -- 输入完整到 YYYYMMDD 后，再根据三种语义的真实状态给提示。
         -- 公历无效但农历有效时仍保留农历->公历候选，不做一刀切。
         if len >= 8 then
@@ -2692,7 +2693,7 @@ local function translator(input, seg, env)
       end
     end
   else
-    if input:sub(1, 1) == '/' or input:sub(1, 1) == 'o' then
+    if input:sub(1, 1) == '/' or input:sub(1, 1) == 'O' then
       command = input:sub(2)
     end
   end
@@ -2755,17 +2756,17 @@ local function translator(input, seg, env)
     local hour = os.date('%H', target_ts)
     local candidates = {
       { string.format('%d年%d月%d日', target_dt.year, target_dt.month, target_dt.day), '〔日期〕' },
-      { CnDate_translator(os.date('%Y%m%d', now_ts)), '〔日期〕' },
-      { Date2LunarDate(ymd) .. JQtest(ymd), '〔公历⇉农历〕' },
       { os.date('%Y-%m-%d', target_ts), '〔日期〕' },
+      { Date2LunarDate(ymd) .. GetLunarSichen(hour, 1), '〔公历⇉农历〕' },
       { os.date('%Y/%m/%d', target_ts), '〔日期〕' },
       { lunarJzl(ymdh), '〔公历⇉农历〕' },
-      { Date2LunarDate(ymd) .. GetLunarSichen(hour, 1), '〔公历⇉农历〕' },
-      { LunarDate2Date(ymd, 0), '〔农历⇉公历〕' },
+      { Date2LunarDate(ymd) .. JQtest(ymd), '〔公历⇉农历〕' },
+      { CnDate_translator(os.date('%Y%m%d', now_ts)), '〔日期〕' },
+      { LunarDate2Date(ymd, false), '〔农历⇉公历〕' },
     }
-    local leapDate = { LunarDate2Date(ymd, 1) .. '（闰）', '〔农历⇉公历〕' }
-    if string.match(leapDate[1], '^(%d+)') ~= nil then
-      table.insert(candidates, leapDate)
+    local leapDate = LunarToGregorianInfo(ymd, true)
+    if leapDate then
+      candidates[#candidates + 1] = { leapDate.text .. '（闰）', '〔农历⇉公历〕' }
     end
     generate_candidates(input, 'rc', seg, candidates)
     set_segment_prompt(context, num_year)
@@ -2782,7 +2783,7 @@ local function translator(input, seg, env)
       { os.date('%H:%M:%S'), '〔时间〕' },
       { format_Time() .. os.date('%I:%M', now_ts), '〔时间〕' },
       { string.format('%d点%d分', now.hour, now.min), '〔时间〕' },
-      { string.format('%d点%d分%d秒', now.hour, now.min, now.sec), '〔时间〕' },
+      { string.format('%d时%d分%d秒', now.hour, now.min, now.sec), '〔时间〕' },
       { sichen, '〔时间〕' },
     }
     generate_candidates(input, 'sj', seg, candidates)
@@ -2885,11 +2886,12 @@ local function translator(input, seg, env)
       { Date2LunarDate(ymd) .. JQtest(ymd), '〔公历⇉农历〕' },
       { lunarJzl(ymdh), '〔公历⇉农历〕' },
       { Date2LunarDate(ymd) .. GetLunarSichen(hour, 1), '〔公历⇉农历〕' },
-      { LunarDate2Date(ymd, 0), '〔农历⇉公历〕' },
+      { CnDate_translator(os.date('%Y%m%d', now_ts)), '〔日期〕' },
+      { LunarDate2Date(ymd, false), '〔农历⇉公历〕' },
     }
-    local leapDate = { LunarDate2Date(ymd, 1) .. '（闰）', '〔农历⇉公历〕' }
-    if string.match(leapDate[1], '^(%d+)') ~= nil then
-      table.insert(candidates, leapDate)
+    local leapDate = LunarToGregorianInfo(ymd, true)
+    if leapDate then
+      candidates[#candidates + 1] = { leapDate.text .. '（闰）', '〔农历⇉公历〕' }
     end
     generate_candidates(input, 'nl', seg, candidates)
     set_segment_prompt(context, year)

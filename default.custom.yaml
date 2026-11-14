@@ -86,6 +86,6 @@ patch:
       expression: "^=.*$"
       punct: "^/([0-9]0?|[A-Za-z]+)$"
       reverse_lookup: "^z[a-z]*'?$"
-      uppercase": "[A-Z][-_+.'0-9A-Za-z]*$"
+      uppercase: "[A-Z][-_+.'0-9A-Za-z]*$"
       url: "^(www[.]|https?:|ftp[.:]|mailto:|file:|localhost).*$|^[a-z]+[.].+$"
-      sjc: "^[/o]rc\\d+[-+=op]?$"
+      sjc: "^[/O]rc\\d+[-+=op]?$"

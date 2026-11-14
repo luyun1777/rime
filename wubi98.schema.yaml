@@ -75,7 +75,7 @@ engine:
     - reverse_lookup_translator
     - table_translator
     - lua_translator@date_translator
-    - lua_translator@lunar_translator
+    # - lua_translator@lunar_translator
     - lua_translator@*shijian_translator
     - lua_translator@calculator_translator
     - lua_translator@*super_calculator
