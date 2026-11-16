@@ -1,63 +1,63 @@
--- 日期时间
-
 local M = {}
-local number = { '〇', '一', '二', '三', '四', '五', '六', '七', '八', '九' }
+
+local numbers = { '〇', '一', '二', '三', '四', '五', '六', '七', '八', '九' }
+
+function M.init(env)
+  local config = env.engine.schema.config
+  env.name_space = env.name_space:gsub('^*', '')
+  env._date = config:get_string(env.name_space .. '/date') or 'date'
+  env._time = config:get_string(env.name_space .. '/time') or 'time'
+  env._week = config:get_string(env.name_space .. '/week') or 'week'
+  env._datetime = config:get_string(env.name_space .. '/datetime') or 'dati'
+end
 
 -- 年天数判断
-local function IsLeap(y)
-  local year = tonumber(y)
-  if not year then
-    return nil
-  end
-  if math.fmod(year, 400) ~= 0 and math.fmod(year, 4) == 0 or math.fmod(year, 400) == 0 then
+---@param year integer
+---@return integer year
+local function IsLeap(year)
+  if (year % 4 == 0 and year % 100 ~= 0) or year % 400 == 0 then
     return 366
   else
     return 365
   end
 end
 
-local function toUp(text)
-  for i, v in ipairs(number) do
-    text = text:gsub(i - 1, v)
+---@param date string?
+---@return string
+local function CnDate_translator(date)
+  date = date or tostring(os.date('%Y%m%d'))
+  local t
+  local text = ''
+  for i = 1, #date do
+    t = numbers[tonumber(date:sub(i, i)) + 1]
+    if i == 5 and t ~= '〇' then
+      t = '年十'
+    elseif i == 5 and t == '〇' then
+      t = '年'
+    end
+    if i == 6 and t ~= '〇' then
+      t = t .. '月'
+    elseif i == 6 and t == '〇' then
+      t = '月'
+    end
+    if i == 7 and tonumber(date:sub(7, 7)) > 1 then
+      t = t .. '十'
+    elseif i == 7 and t == '〇' then
+      t = ''
+    elseif i == 7 and tonumber(date:sub(7, 7)) == 1 then
+      t = '十'
+    end
+    if i == 8 and t ~= '〇' then
+      t = t .. '日'
+    elseif i == 8 and t == '〇' then
+      t = '日'
+    end
+    text = text .. t
   end
   return text
 end
 
-local function getUpDate()
-  local m = tonumber(os.date('%m'))
-  local d = tonumber(os.date('%d'))
-
-  local year = toUp(os.date('%Y'))
-  local month = toUp(tostring(m))
-  if m == 10 then
-    month = '十'
-  elseif m > 10 then
-    month = month:gsub('^一', '十')
-  end
-  local date = toUp(tostring(d))
-  if d == 10 then
-    date = '十'
-  elseif d % 10 == 0 then
-    date = date:gsub('〇', '十')
-  elseif d > 10 and d < 20 then
-    -- common hanzi's length is 3 in UTF-8
-    date = '十' .. date:sub(4)
-  elseif d > 20 then
-    date = date:sub(1, 3) .. '十' .. date:sub(4)
-  end
-  return year .. '年' .. month .. '月' .. date .. '日'
-end
-
-function M.init(env)
-  local config = env.engine.schema.config
-  env.name_space = env.name_space:gsub('^*', '')
-  M.date = config:get_string(env.name_space .. '/date') or 'date'
-  M.time = config:get_string(env.name_space .. '/time') or 'time'
-  M.week = config:get_string(env.name_space .. '/week') or 'week'
-  M.datetime = config:get_string(env.name_space .. '/datetime') or 'dati'
-end
-
-function M.func(input, seg)
+function M.func(input, seg, env)
   -------------------------------------------------------------
   --[[
 	--%a 星期简称，如Wed	%A 星期全称，如Wednesday
@@ -77,58 +77,56 @@ function M.func(input, seg)
 --]]
   ----------------------------------------------------------------
   -- 日期
-  if input == M.date then
-    local dates = {
-      tostring(os.date('%Y年%m月%d日', os.time())):gsub('年0', '年'):gsub('月0', '月'),
-      os.date('%Y-%m-%d', os.time()),
-      getUpDate(),
-      getUpDate():gsub('(.+月).+日', '%1'),
-      os.date('%Y/%m/%d', os.time()),
+  if input == env._date then
+    local now = os.date('*t')
+    local cnadidates = {
+      string.format('%d年%d月%d日', now.year, now.month, now.day),
+      os.date('%Y-%m-%d'),
+      CnDate_translator(),
+      CnDate_translator():gsub('(.+月).+日', '%1'),
+      os.date('%Y/%m/%d'),
     }
-    -- Candidate(type, start, end, text, comment)
-    for _, date in ipairs(dates) do
-      yield(Candidate(input, seg.start, seg._end, date, '〔日期〕'))
+    for _, candidate in ipairs(cnadidates) do
+      yield(Candidate('date', seg.start, seg._end, candidate, '〔日期〕'))
     end
 
   -- 时间
-  elseif input == M.time then
-    local times = {
+  elseif input == env._time then
+    local now = os.date('*t')
+    local candidates = {
+      string.format('%d:%d', now.hour, now.min),
       os.date('%H:%M:%S'),
-      os.date('%H:%M'),
+      string.format('%d点%d分', now.hour, now.min),
+      os.date('%H时%M分%S秒'),
     }
-    for _, time in ipairs(times) do
-      yield(Candidate(input, seg.start, seg._end, time, '〔时间〕'))
+    for _, candidate in ipairs(candidates) do
+      yield(Candidate('time', seg.start, seg._end, candidate, '〔时间〕'))
     end
 
   -- 星期
-  elseif input == M.week then
+  elseif input == env._week then
     local week_tab = { '日', '一', '二', '三', '四', '五', '六' }
-    local week_ = week_tab[tonumber(os.date('%w', os.time()) + 1)]
-    local weeks = {
-      '星期' .. week_,
-      '周' .. week_,
-      '礼拜' .. week_,
+    local week = week_tab[tonumber(os.date('%w') + 1)]
+    local candidates = {
+      '星期' .. week,
+      '周' .. week,
+      '礼拜' .. week,
     }
-    -- Candidate(type, start, end, text, comment)
-    for _, week in ipairs(weeks) do
-      yield(Candidate(input, seg.start, seg._end, week, '〔星期〕'))
+    for _, candidate in ipairs(candidates) do
+      yield(Candidate('week', seg.start, seg._end, candidate, '〔星期〕'))
     end
 
   -- 日期和时间
-  elseif input == M.datetime then
-    local datetimes = {
-      tostring(os.date('%Y年%m月%d日 %H时%M分%S秒', os.time()))
-        :gsub('年0', '年')
-        :gsub('月0', '月')
-        :gsub('日 0', '日 ')
-        :gsub('时0', '时')
-        :gsub('分0', '分'),
-      os.date('%Y-%m-%d %H:%M:%S', os.time()),
+  elseif input == env._datetime then
+    local now = os.date('*t')
+    local candidates = {
+      string.format('%d年%d月%d日 %d时%d分%d秒', now.year, now.month, now.day, now.hour, now.min, now.sec),
+      os.date('%Y-%m-%d｜%j/' .. IsLeap(now.year)),
       os.date('%Y-%m-%d 第%W周'),
-      os.date('%Y-%m-%d｜%j/' .. IsLeap(os.date('%Y'))),
+      os.date('%Y-%m-%d %H:%M:%S'),
     }
-    for _, time in ipairs(datetimes) do
-      yield(Candidate(input, seg.start, seg._end, time, '〔日期&时间〕'))
+    for _, cnadidate in ipairs(candidates) do
+      yield(Candidate('datetime', seg.start, seg._end, cnadidate, '〔日期&时间〕'))
     end
   end
 end

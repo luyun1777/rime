@@ -1,5 +1,34 @@
--- Rime Script >https://github.com/baopaau/rime-lua-collection/blob/master/calculator_translator.lua
 -- 簡易計算器（執行任何Lua表達式）
+-- 来源: https://github.com/baopaau/rime-lua-collection/blob/master/calculator_translator.lua
+
+-- Mintimate <https://github.com/Mintimate> 修改:
+--   1. 解决了 鼠须管输入法 调用可能存在的问题。
+--   2. 动态获取触发前缀。
+--
+-- 格式：=<exp>
+-- Lambda語法糖：\<arg>.<exp>|
+--
+-- 例子：
+-- =1+1 輸出 2
+-- =floor(9^(8/7)*cos(deg(6))) 輸出 -3
+-- =e^pi>pi^e 輸出 true
+-- =max({1,7,2}) 輸出 7
+-- =map({1,2,3},\x.x^2|) 輸出 {1, 4, 9}
+-- =map(range(-5,5),\x.x*pi/4|,deriv(sin)) 輸出 {-0.7071, -1, -0.7071, 0, 0.7071, 1, 0.7071, 0, -0.7071, -1}
+-- =$(range(-5,5,0.01))(map,\x.-60*x^2-16*x+20|)(max)() 輸出 21.066
+-- =test(\x.trunc(sin(x),1e-3)==trunc(deriv(cos)(x),1e-3)|,range(-2,2,0.1)) 輸出 true
+--
+-- 安装：
+-- - 將本文件保存至 <rime>/lua/
+-- - 在 <rime>/rime.lua 新增一行：
+--   `calculator_translator = require("calculator_translator")`
+-- - 在 <rime>/<schema>.schema.yaml 新增：
+--   `engine/translators/@next: lua_translator@calculator_translator`
+--   `recognizer/patterns/expression: "^=.*$"`
+-- 註：
+-- - <rime> 替換爲RIME的共享目錄
+-- - <schema> 替換爲自己的方案ID
+-- - 如目錄／文件不存在，請自行創建
 
 -- 定義全局函數、常數（注意命名空間污染）
 cos = math.cos
@@ -336,26 +365,39 @@ local function serialize(obj)
   return obj
 end
 
--- greedy：隨時求值（每次變化都會求值，否則結尾爲特定字符時求值）
-local greedy = true
+-- 是否随时计算
+local ImmediateCalculation = true
 
-local function calculator_translator(input, seg)
-  if string.sub(input, 1, 1) ~= '=' then
+local function calculator_translator(input, seg, env)
+  -- 获取 recognizer/patterns/expression 的第 2 个字符作为触发前缀（也就是获取等于号 = 或其他自定义字符）
+  local expression_keyword = env.engine.schema.config:get_string('recognizer/patterns/expression')
+  local pattern = env.engine.schema.config:get_string('recognizer/patterns/expression')
+  expression_keyword = pattern and pattern:sub(2, 2) or '='
+
+  -- 如果当前输入的是触发前缀，则尝试解析输入的 Lua 表达式，其中 seg:has_tag 判断是否是候选词；否则返回
+  if not (seg:has_tag('expression') and expression_keyword ~= '' and input:sub(1, 1) == expression_keyword) then
     return
   end
 
-  local expfin = greedy or string.sub(input, -1, -1) == ';'
-  local exp = (greedy or not expfin) and string.sub(input, 2, -1) or string.sub(input, 2, -2)
+  -- 解决 鼠须管 单个 input 字直接上屏问题
+  if string.len(input) < 2 then
+    -- 输入内容太短，不做处理
+    return
+  end
 
-  -- 空格輸入可能
-  exp = exp:gsub('#', ' ')
-
+  -- 匹配结束标记字符
+  local expfin = ImmediateCalculation or input:sub(-1, -1) == ';'
   if not expfin then
     return
   end
 
+  local exp = (ImmediateCalculation or not expfin) and input:sub(2, -1) or input:sub(2, -2)
+
+  -- 空格输入可能
+  exp = exp:gsub('#', ' ')
+
   local expe = exp
-  -- 鏈式調用語法糖
+  -- 链式调用语法糖
   expe = expe:gsub('%$', ' chain ')
   -- lambda語法糖
   do
@@ -364,21 +406,22 @@ local function calculator_translator(input, seg)
       expe, count = expe:gsub('\\%s*([%a%d%s,_]-)%s*%.(.-)|', ' (function (%1) return %2 end) ')
     until count == 0
   end
-  --yield(Candidate("number", seg.start, seg._end, expe, "展開"))
 
   -- 防止危險操作，禁用os和io命名空間
   if expe:find('i?os?%.') then
     return
   end
-  -- return語句保證了只有合法的Lua表達式才可執行
+
+  -- 表达式的计算
   local result = load('return ' .. expe)()
   if result == nil then
     return
   end
 
   result = serialize(result)
-  yield(Candidate('number', seg.start, seg._end, tostring(result), ''))
-  yield(Candidate('number', seg.start, seg._end, exp .. '=' .. result, ''))
+  yield(Candidate('number', seg.start, seg._end, expe, '展开'))
+  yield(Candidate('number', seg.start, seg._end, tostring(result), '答案'))
+  yield(Candidate('number', seg.start, seg._end, exp .. ' = ' .. result, '等式'))
 end
 
 return calculator_translator

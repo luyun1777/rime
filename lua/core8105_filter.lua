@@ -1,83 +1,142 @@
+--- 只输出`core8105.dict.yaml` 中的常用汉字进行过滤
+--- 通过选项 `charset_filter` 控制开关
+
+local M = {}
+
+--- see `http://www.unicode.org/charts/`
+---@type CharsetRange[]
 local charsets = {
-  { first = 0x4e00, last = 0x9fff }, -- 基本区
-  { first = 0x3400, last = 0x4dbf }, -- 扩A
-  { first = 0x20000, last = 0x2a6df }, -- 扩B
-  { first = 0x2a700, last = 0x2b73f }, -- 扩C
-  { first = 0x2b740, last = 0x2b81f }, -- 扩D
-  { first = 0x2b820, last = 0x2ceaf }, -- 扩E
-  { first = 0x2ceb0, last = 0x2ebef }, -- 扩F
-  { first = 0x30000, last = 0x3134f }, -- 扩G
-  { first = 0x31350, last = 0x323af }, -- 扩H
-  { first = 0x2EBF0, last = 0x2EE5D }, -- 扩I
-  { first = 0x31c0, last = 0x31ef }, -- 笔画
-  { first = 0x2e80, last = 0x2eff }, -- 部首扩展
-  { first = 0x2f00, last = 0x2fdf }, -- 康熙部首
-  { first = 0xf900, last = 0xfadf }, -- 兼容
-  { first = 0x2f800, last = 0x2fa1f }, -- 兼补
-  { first = 0x2ff0, last = 0x2fff }, -- 汉字结构
-  { first = 0x3100, last = 0x312f }, -- 注音
-  { first = 0x31a0, last = 0x31bf }, -- 注音扩展
-  -- -- 以上为汉字部分
-  -- { first = 0x3040, last = 0x309f }, -- 平假名
-  -- { first = 0x30a0, last = 0x30ff }, -- 片假名
-  -- { first = 0x31f0, last = 0x31ff }, -- 假名扩展
-  -- { first = 0x1b000, last = 0x1b0ff }, -- 假名补充
-  -- { first = 0x1b100, last = 0x1b12f }, -- 假名扩展A
-  -- { first = 0x1b130, last = 0x1b16f }, -- 小型日文假名扩展
-  -- -- 韩文
-  -- { first = 0x1100, last = 0x11ff }, -- 韩文字母
-  -- { first = 0x3130, last = 0x318f }, -- 韩文兼容字母
-  -- { first = 0xa960, last = 0xa97f }, -- 韩文字母扩展-A
-  -- { first = 0xd7b0, last = 0xd7ff }, -- 韩文字母扩展-B
-  -- { first = 0xac00, last = 0xd7af }, -- 韩文音节
-  -- CJK
-  -- { first = 0xfe30, last = 0xfe4f }, -- 中日韩兼容形式
-  -- { first = 0x3200, last = 0x32ff }, -- 中日韩弧圈字符
-  -- { first = 0x3000, last = 0x303f }, -- 中日韩符号和标点
-  -- 私用区
-  { first = 0xe000, last = 0xf8ff }, -- 私用区
-  { first = 0xf0000, last = 0xffff }, -- 私用区补充A
-  { first = 0x100000, last = 0x10ffff }, -- 私用区补充B
+  { name = '[部首增补]', first = 0x2E80, last = 0x2EFF },
+  { name = '[康熙部首]', first = 0x2F00, last = 0x2FDF },
+  { name = '[笔画]', first = 0x31C0, last = 0x31EF },
+  { name = '[扩A]', first = 0x3400, last = 0x4DBF },
+  { name = '[基本区]', first = 0x4E00, last = 0x9FFF },
+  { name = '[CJK兼容表意]', first = 0xF900, last = 0xFAFF },
+  { name = '[扩B]', first = 0x20000, last = 0x2A6DF },
+  { name = '[扩C]', first = 0x2A700, last = 0x2B73F },
+  { name = '[扩D]', first = 0x2B740, last = 0x2B81F },
+  { name = '[扩E]', first = 0x2B820, last = 0x2CEAF },
+  { name = '[扩F]', first = 0x2CEB0, last = 0x2EBEF },
+  { name = '[扩I]', first = 0x2EBF0, last = 0x2EE5F },
+  { name = '[兼补]', first = 0x2F800, last = 0x2FA1F },
+  { name = '[扩G]', first = 0x30000, last = 0x3134F },
+  { name = '[扩H]', first = 0x31350, last = 0x323AF },
+  { name = '[扩J]', first = 0x323B0, last = 0x3347F },
 }
 
+--- 加载期校验：确保 `charsets` 严格按 `first` 升序，且每个区间 `first <= last`。
+---
+--- `is_cjk` 的二分查找依赖严格升序；区间无效会导致匹配错误。
+---
+---@local
+--- do
+---   for i = 1, #charsets do
+---     local r = charsets[i]
+---     assert(
+---       r.first <= r.last,
+---       string.format('charsets 无效区间: %s (first=0x%X > last=0x%X)', r.name, r.first, r.last)
+---     )
+---     if i > 1 then
+---       assert(
+---         r.first > charsets[i - 1].last,
+---         string.format(
+---           'charsets 未按 first 升序: %s (0x%X) 在 %s (0x%X) 之后',
+---           r.name,
+---           r.first,
+---           charsets[i - 1].name,
+---           charsets[i - 1].last
+---         )
+---       )
+---     end
+---   end
+--- end
+
+M.init = function(env)
+  local ok, db = pcall(ReverseDb, 'build/core8105.reverse.bin')
+  if ok and db then
+    env.coredb = db -- 当此组件被载入时，打开反查库，并存入 `coredb` 中
+  else
+    env.coredb = nil
+  end
+  env._cjk_cache = {}
+  env._cjk_cache_db = env.coredb
+end
+
+local utf8_char = utf8.char
+local utf8_codes = utf8.codes
+local floor = math.floor
+
+---@param code integer 待查询的 Unicode 码位
+---@return boolean
 local function is_cjk(code)
-  for _, charset in ipairs(charsets) do
-    if (code >= charset.first) and (code <= charset.last) then
+  local left, right = 1, #charsets
+  while left <= right do
+    local mid = floor((left + right) / 2)
+    local range = charsets[mid]
+    if code < range.first then
+      right = mid - 1
+    elseif code > range.last then
+      left = mid + 1
+    else
       return true
     end
   end
   return false
 end
 
-local function should_yield(text, option, coredb)
-  local _should_yield = true
-  if option then
-    for i in utf8.codes(text) do
-      local code = utf8.codepoint(text, i)
-      if is_cjk(code) then
-        local _charset = coredb:lookup(utf8.char(code))
-        if _charset == '' then
-          _should_yield = false
-          break
-        end
-      end
-    end
+--- 判断Uincode码位是否在过滤库中`core8105`
+---@param code integer
+---@param env any Rime 环境对象（含 engine / context 等）
+---@return boolean
+local function in_coredb(code, env)
+  local coredb = env.coredb
+  if coredb == nil then
+    return true -- 库缺失时兜底：放行（可改为 false 表示全过滤）
   end
-  return _should_yield
+  if env._cjk_cache_db ~= coredb then -- coredb 实例变化时清缓存
+    env._cjk_cache = {}
+    env._cjk_cache_db = coredb
+  end
+  local cache = env._cjk_cache
+  local hit = cache[code]
+  if hit ~= nil then
+    return hit
+  end
+  hit = (coredb:lookup(utf8_char(code)) ~= '')
+  cache[code] = hit
+  return hit
 end
 
-local function filter(input, env)
+---@param text string
+---@param option boolean
+---@param env Env
+---@return boolean
+local function should_yield(text, option, env)
+  if not option then
+    return true
+  end
+  for _, code in utf8_codes(text) do
+    if is_cjk(code) and not in_coredb(code, env) then
+      return false
+    end
+  end
+  return true
+end
+
+---@param input Translation
+---@param env   Env
+M.func = function(input, env)
   local on = env.engine.context:get_option('charset_filter')
   for cand in input:iter() do
-    if should_yield(cand.text, on, env.coredb) then
+    if should_yield(cand.text, on, env) then
       yield(cand)
     end
   end
 end
 
-local function init(env)
-  -- 当此组件被载入时，打开反查库，并存入 `coredb` 中
-  env.coredb = ReverseDb('build/core8105.reverse.bin')
+M.fini = function(env)
+  env._cjk_cache = nil
+  env._cjk_cache_db = nil
 end
 
-return { init = init, func = filter }
+return M

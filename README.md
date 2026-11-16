@@ -25,7 +25,7 @@
 | <kbd>ctrl</kbd> + <kbd>grave</kbd> \| <kbd>ctrl</kbd> + <kbd>shift</kbd> + <kbd>grave</kbd> | 菜单项, `grave`表示<kbd>`</kbd>键                                                     |
 | <kbd>ctrl</kbd> + <kbd>.</kbd>                                                              | 中英文标点切换                                                                        |
 | <kbd>shift</kbd> + <kbd>space</kbd>                                                         | 全角半角切换                                                                          |
-| <kbd>ctrl</kbd> + <kbd>u</kbd>                                                              | 字符分区提示与隐藏                                                                    |
+| <kbd>ctrl</kbd> + <kbd>y</kbd>                                                              | 字符分区提示与隐藏                                                                    |
 | <kbd>ctrl</kbd> + <kbd>o</kbd>                                                              | 简体转繁体切换                                                                        |
 | <kbd>ctrl</kbd> + <kbd>shift</kbd> + <kbd>O</kbd>                                           | 繁体转简体切换                                                                        |
 | <kbd>ctrl</kbd> + <kbd>h</kbd>                                                              | [自定义字集过滤](https://github.com/iDvel/rime-ice/blob/main/cn_dicts/8105.dict.yaml) |
@@ -33,11 +33,11 @@
 | <kbd>ctrl</kbd> + <kbd>j</kbd>                                                              | 拆分显示与隐藏                                                                        |
 | <kbd>ctrl</kbd> + <kbd>p</kbd>                                                              | 拼音（词组）反查                                                                      |
 | <kbd>ctrl</kbd> + <kbd>i</kbd>                                                              | emoji开关                                                                             |
-| <kbd>ctrl</kbd> + <kbd>y</kbd>                                                              | 显示单字的Unicode编码开关                                                             |
+| <kbd>ctrl</kbd> + <kbd>u</kbd>                                                              | 显示单字的Unicode编码开关                                                             |
 
 > 默认以地球拼音反查显示单字的读音，若要显示词组的读音，可使用快捷键<kbd>ctrl</kbd>+<kbd>p</kbd>（使用opencc配置）
 >
-> 上表除前三项外，快捷键仅在打字时生效（即有候选项时）
+> 上表除前三项外，快捷键仅在有候选项时生效
 
 ### 2. 功能按键
 
@@ -60,16 +60,15 @@
 
 5. 以`=` | `V` 开头可用做临时计算器
 
-6. 输出统 `时间`、`日期` 、`星期`、`农历`和`节气`
+6. 输出当前 `日期` / `时间`/`星期`/`农历`/`节气`: `/`|`O` + `rq`、`sj`、`xq`、`jq`
+   或者:
 
-| 编码                            | 说明               |
-| ------------------------------- | ------------------ |
-| date                            | 输出当天日期       |
-| time                            | 输出当前时间       |
-| dati                            | 输出当前日期和时间 |
-| week                            | 输出当前星期       |
-| pedl（五笔86）\| pede（五笔98） | 农历干支信息查看   |
-| abrn（五笔86）\| abrt（五笔98） | 二十四节气信息查看 |
+| 编码 | 说明               |
+| ---- | ------------------ |
+| date | 输出当前日期       |
+| time | 输出当前时间       |
+| week | 输出当前星期       |
+| dati | 输出当前日期和时间 |
 
 ### 5. 其他说明
 

@@ -55,50 +55,47 @@ switches:
 
 engine:
   processors:
-    - ascii_composer
-    - recognizer
-    - key_binder
-    - lua_processor@select_character
-    - speller
-    - punctuator
-    - selector
-    - navigator
-    - express_editor
+    - lua_processor@*unicode_conversion*P # 通过ctrl+u快捷键捕获当前高亮候选转换查询unicode，重复按下可还原
+    - ascii_composer # 处理英文模式及中英文切换
+    - recognizer # 与 matcher 搭配，处理符合特定规则的输入码，如网址、反查等 tags
+    - key_binder # 在特定条件下将按键绑定到其他按键，如重定义逗号、句号为候选翻页、开关快捷键等
+    - lua_processor@*select_character #  以词定字 `[`、`]`
+    - speller # 拼写处理器，接受字符按键，编辑输入
+    - punctuator # 符号处理器，将单个字符按键直接映射为标点符号或文字
+    - selector # 选字处理器，处理数字选字键〔可以换成别的哦〕、上、下候选定位、换页
+    - navigator # 处理输入栏内的光标移动
+    - express_editor # 编辑器，处理空格、回车上屏、回退键
   segmentors:
-    - ascii_segmentor
-    - matcher
-    - abc_segmentor
-    - punct_segmentor
-    - fallback_segmentor
+    - ascii_segmentor # 标识英文段落〔譬如在英文模式下〕字母直接上屛
+    - matcher # 配合 recognizer 标识符合特定规则的段落，如网址、反查等，加上特定 tag
+    - abc_segmentor # 标识常规的文字段落，加上 abc 这个 tag
+    - punct_segmentor # 标识符号段落〔键入标点符号用〕加上 punct 这个 tag
+    - fallback_segmentor # 标识其他未标识段落，必须放在最后帮助tag模式切换后回退重新处理
   translators:
-    - punct_translator
-    - reverse_lookup_translator
-    - table_translator
-    - lua_translator@date_translator
-    # - lua_translator@lunar_translator
-    - lua_translator@*shijian_translator
-    - lua_translator@calculator_translator
-    - lua_translator@*super_calculator
-    - lua_translator@unicode_translator
-    # - lua_translator@number_translator
-    - lua_translator@*number_conversion
-    - history_translator@historyZ
-
+    - punct_translator # 配合 punct_segmentor 转换标点符号
+    - reverse_lookup_translator # 反查翻译器，用另一种编码方案查码
+    - table_translator # 码表翻译器，用于仓颉、五笔等基于码表的输入方案
+    - lua_translator@*date_translator # 日期、时间
+    - lua_translator@*shijian_translator #农历、日期、节气、节日、时间、周、问候模板等等
+    - lua_translator@*calculator_translator # 简易计算器
+    - lua_translator@*super_calculator # 超级计算器，Lua内查看高级用法
+    - lua_translator@*unicode_conversion*T # 通过输入大写U引导，并输入Unicode编码获得汉字输出
+    - lua_translator@*number_translator # 数字、金额大写，通过输入大写R1234获得候选输出
+    - history_translator@historyZ # `z` 键显示上次输入的候选项
   filters:
-    - lua_filter@core8105 # 自定义字集过滤lua
-    # - lua_filter@charset_filter # 自定义字集过滤lua
+    - lua_filter@*core8105_filter # 自定义字集过滤lua
+    - lua_filter@*single_char_first_filter # 保证单字在先
+    - lua_filter@*reverse_lookup_filter # 依地球拼音为单字加上带音调的拼音注释
     # - simplifier
-    - simplifier@simplification
-    - simplifier@tradition
+    - simplifier@simplification # 简体 -> 繁體
+    - simplifier@tradition # 繁體 -> 简体
     - simplifier@pinyin # 拼音滤镜
     - simplifier@chaifen # 拆分滤镜
     - simplifier@emoji_cn # 表情滤镜
-    - lua_filter@single_char_only
-    - lua_filter@unicode_display_filter # lua unicode显示滤镜
-    # - lua_filter@single_char_first_filter
-    - lua_filter@reverse_lookup_filter
-    - lua_filter@charset_comment_filter
-    - uniquifier
+    - lua_filter@*single_char_only # 只出单字
+    - lua_filter@*unicode_display_filter # 显示16进制的 Unicode 编码
+    - lua_filter@*charset_comment_filter # 给字符加上所属 Unicode 的分区注释
+    - uniquifier # 过滤重复的候候字
 
 speller:
   max_code_length: 4
@@ -113,14 +110,14 @@ speller:
 
 translator:
   dictionary: wubi98
-  max_phrase_length: 4
-  enable_completion: true # 逐键提示
-  enable_charset_filter: false # 开启字符集过滤
+  enable_charset_filter: false # 是否开启字符集过滤〔仅table_translator有效。启用cjk_minifier后可适用于script_translator〕
+  enable_completion: true # 逐键提示 | 提前显示尚未输入完整码的字〔仅table_translator有效〕
   # 要开启造词，将以下四项设为true
-  enable_encoder: true # 自动造词
-  enable_sentence: false # 句子输入模式
+  enable_encoder: false # 是否开启自动造词〔仅table_translator有效〕
+  enable_sentence: false # 是否开启自动造句
   encode_commit_history: false # 是否对已上屏词自动成词（仅 table_translator 有效）
   enable_user_dict: false # 是否开启用户词典（用户词典记录动态字词频，用户词）
+  max_phrase_length: 4 # 最大自动成词词长〔仅table_translator有效〕
   disable_user_dict_for_patterns:
     - "^z.*$"
     - "^[a-y]{1,3}$"
@@ -151,8 +148,8 @@ key_binder:
     - { accept: "Control+d", toggle: single_char_only, when: composing } # 单字开关
     - { accept: "Control+p", toggle: pinyin, when: composing } # PC 拼音开关
     - { accept: "Control+i", toggle: emoji_cn, when: composing } # PC emoji开关
-    - { accept: "Control+u", toggle: charset_comment_filter, when: composing } # PC Unicode分区开关
-    - { accept: "Control+y", toggle: udpf_switch, when: composing } # PC Unicode编码开关
+    - { accept: "Control+y", toggle: charset_comment_filter, when: composing } # PC Unicode分区开关
+    - { accept: "Control+Shift+U", toggle: udpf_switch, when: composing } # PC Unicode编码开关
     - { accept: "Control+h", toggle: charset_filter, when: composing } # PC 自定字集开关
     - { accept: "Control+j", toggle: chaifen, when: composing } # PC 拆分滤镜开关
 recognizer:

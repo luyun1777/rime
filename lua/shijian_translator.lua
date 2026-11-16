@@ -24,7 +24,7 @@ local function rad2mrad(v) -- 对超过0-2PI的角度转为0-2PI
   end
 end
 
-function rad2str(d, tim) -- 将弧度转为字串
+local function rad2str(d, tim) -- 将弧度转为字串
   ---tim=0输出格式示例: -23°59' 48.23"
   ---tim=1输出格式示例:  18h 29m 44.52s
   local s = '+'
@@ -279,7 +279,7 @@ local function hcjj1(t) -- 返回黄赤交角(常规精度),短期精度很高
   return (hcjjB[1] + hcjjB[2] * t1 + hcjjB[3] * t2 + hcjjB[4] * t3) / rad
 end
 
-function HCconv(JW, E) -- 黄赤转换(黄赤坐标旋转)
+local function HCconv(JW, E) -- 黄赤转换(黄赤坐标旋转)
   -- 黄道赤道坐标变换,赤到黄E取负
   local HJ = rad2mrad(JW[1])
   HW = JW[2]
@@ -614,7 +614,7 @@ local M1n = { 3.81034392032, 8.39968473021E+03, -3.31919929753E-05, 3.2017095500
 
 --日位置计算
 local EnnT = 0 -- 调用Enn前先设置EnnT时间变量
-function Enn(F) -- 计算E10,E11,E20等,即:某一组周期项或泊松项算出,计算前先设置EnnT时间
+local function Enn(F) -- 计算E10,E11,E20等,即:某一组周期项或泊松项算出,计算前先设置EnnT时间
   local v = 0
   for i = 1, #F, 3 do
     v = v + F[i] * math.cos(F[i + 1] + EnnT * F[i + 2])
@@ -649,7 +649,7 @@ end
 
 --月位置计算
 local MnnT = 0 -- 调用Mnn前先设置MnnT时间变量
-function Mnn(F) -- 计算M10,M11,M20等,计算前先设置MnnT时间
+local function Mnn(F) -- 计算M10,M11,M20等,计算前先设置MnnT时间
   local v = 0
   local t1 = MnnT
   local t2 = t1 * t1
@@ -822,7 +822,7 @@ local function get_jieqi_date_map(year)
   return result
 end
 
-function JQtest(date)
+local function JQtest(date)
   local ymd = tostring(date):sub(1, 8)
   if #ymd < 8 then
     return ''
@@ -832,7 +832,7 @@ function JQtest(date)
   return name and ('-' .. name) or ''
 end
 
-function GetNextJQ(date)
+local function GetNextJQ(date)
   local ymd = tostring(date):sub(1, 8)
   if #ymd < 8 then
     return {}
@@ -899,7 +899,7 @@ local function dingSuo(y, arc) -- 这是个测试函数
 end
 
 --农历计算
-function GetNowTimeJq(date)
+local function GetNowTimeJq(date)
   local ymd = tostring(date):sub(1, 8)
   if #ymd < 8 then
     return '无效日期'
@@ -1607,7 +1607,7 @@ local function GregorianToLunarInfo(Gregorian)
   }
 end
 
-function Date2LunarDate(Gregorian)
+local function Date2LunarDate(Gregorian)
   local info, err = GregorianToLunarInfo(Gregorian)
   return info and info.text or err
 end
@@ -1677,7 +1677,7 @@ local function LunarToGregorianInfo(LunarDate, is_leap)
   }
 end
 
-function LunarDate2Date(Gregorian, isLeap)
+local function LunarDate2Date(Gregorian, isLeap)
   local info, err = LunarToGregorianInfo(Gregorian, isLeap)
   return info and info.text or err
 end
@@ -1691,7 +1691,7 @@ local format_Time = function()
   end
 end
 
-function CnDate_translator(y)
+local function CnDate_translator(y)
   y = y or tostring(os.date('%Y%m%d'))
   local t, cstr, t2
   cstr = { '〇', '一', '二', '三', '四', '五', '六', '七', '八', '九' }
@@ -1835,12 +1835,6 @@ local function format_dt(dt, format_str)
     s = s:gsub('l', tostring(h12))
   end
 
-  if need_ampm then
-    local ampm = (dt.hour < 12) and 'AM' or 'PM'
-    s = s:gsub('p', ampm:lower())
-    s = s:gsub('P', ampm)
-  end
-
   if need_period then
     local h = dt.hour
     local zh_period
@@ -1856,6 +1850,13 @@ local function format_dt(dt, format_str)
       zh_period = '晚上'
     end
     s = s:gsub('A', zh_period)
+  end
+
+  -- 先替换中文时段，避免 A 再次匹配 P 展开后的 AM。
+  if need_ampm then
+    local ampm = (dt.hour < 12) and 'AM' or 'PM'
+    s = s:gsub('p', ampm:lower())
+    s = s:gsub('P', ampm)
   end
 
   if need_timezone then
@@ -2693,7 +2694,7 @@ local function translator(input, seg, env)
       end
     end
   else
-    if input:sub(1, 1) == '/' or input:sub(1, 1) == 'O' then
+    if input:sub(1, 1) == '/' or input:sub(1, 1) == 'O' or input:sub(1, 1) == '6' then
       command = input:sub(2)
     end
   end
@@ -2918,7 +2919,10 @@ local function translator(input, seg, env)
     local _, weekno = iso_week_number(now.year, now.month, now.day)
     local weekno_str = tostring(weekno)
 
-    local candidates = { { '第' .. weekno_str .. '周', '' }, { 'W' .. weekno_str, '' } }
+    local candidates = {
+      { '第' .. weekno_str .. '周', '〔' .. now.year .. '年〕' },
+      { 'W' .. weekno_str, '〔' .. now.year .. '年〕' },
+    }
     generate_candidates(input, 'ww', seg, candidates)
     return
   end
