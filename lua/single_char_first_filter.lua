@@ -1,18 +1,18 @@
---- 过滤器：顺序改为：单字 二字词 三字词 四字词 其他，对魔法字符产生的不排序
---- 采用局部窗口排序，兼顾严格递增与输入跟手
+--- 将候选字顺序改为：单字->二字-> 三字->四字->其他，对魔法字符引导的候选不处理
+--- 采用局部窗口排序，兼顾递增与输入跟手
 
 local M = {}
 
 local utf8_len = utf8.len
-local LIMIT = 30 -- 仅对前 30 个候选词进行严格排序，超出部分直接透传
+local LIMIT = 128 -- 仅对前 `LIMIT` 个候选词进行严格排序，超出部分直接透传
 
 ---@param input Translation
 ---@param env Env
 M.func = function(input, env)
   local text = env.engine.context.input
-  -- 对魔法字符`N`、`O`、`R`、`U`、`/` 等引导的直接透传
+  -- 魔法字符（大写字母 / 符号引导）下的候选多为字母、符号或特殊内容，故直接透传。
   -- 注意：如果大写字母在方案中有正常用途，建议改为精确匹配，如 '^[NRU/]'
-  if text:match('^[A-Z/]') then
+  if text:match('^[%u/]') then
     for cand in input:iter() do
       yield(cand)
     end

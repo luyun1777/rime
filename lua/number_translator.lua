@@ -1,5 +1,7 @@
 -- @amzxyz  https://github.com/amzxyz/rime-wanxiang
 
+local M = {}
+
 local LOWER_DIGITS = { '〇', '一', '二', '三', '四', '五', '六', '七', '八', '九' }
 local UPPER_DIGITS = { '零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖' }
 
@@ -519,7 +521,10 @@ local function get_number_trigger(env)
   return env.number_trigger
 end
 
-local function number_conversion(input, seg, env)
+---@param input string
+---@param seg Segment
+---@param env Env
+M.number_conversion = function(input, seg, env)
   local trigger = get_number_trigger(env)
   if trigger == '' or input:sub(1, 1) ~= trigger then
     return
@@ -543,4 +548,4 @@ local function number_conversion(input, seg, env)
   end
 end
 
-return number_conversion
+return M

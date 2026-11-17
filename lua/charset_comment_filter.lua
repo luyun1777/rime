@@ -1,4 +1,4 @@
---- 为 Rime 候选词追加字符集注释（如 "[基本区] [拉丁]"），
+--- 为候选词追加所属字符集注释（如 "[拉丁] [基本区]"），
 --- 通过选项 `charset_comment_filter` 控制开关
 
 local M = {}
@@ -373,7 +373,6 @@ local charsets = {
 ---
 --- `upper_bound` 的二分查找依赖严格升序；区间无效会导致匹配错误。
 ---
----@local
 --- do
 ---   for i = 1, #charsets do
 ---     local r = charsets[i]
@@ -397,12 +396,13 @@ local charsets = {
 --- end
 
 local utf8_codes = utf8.codes
+local utf8_codepoint = utf8.codepoint
+local utf8_len = utf8.len
 local floor = math.floor
 
--- 二分查找：返回满足 charsets[idx].first <= code 的最大 idx
+--- 二分查找：返回满足 charsets [idx].first <= code 的最大 idx
 ---@param  code integer 待查询的 Unicode 码位
 ---@return integer idx  满足条件的最大索引；`0` 表示小于所有区间起点
----@local
 local function upper_bound(code)
   local left, right = 1, #charsets
   while left <= right do
@@ -416,28 +416,30 @@ local function upper_bound(code)
   return right
 end
 
---- 单字符缓存：`code -> name`（字符串）或 `false`（无匹配）。
----
---- 用 `false` 而非 `nil` 表示"已查过、无匹配"，与"未缓存"（`nil`）
---- 区分，避免重复计算。
+--- 挂在 env 上的缓存状态结构：
+---   char_cache   : table<integer, string|boolean>   单字符 code -> name（false 表示无匹配）
+---   char_cache_n : integer                          已缓存的字符数
+---   text_cache   : table<string, string>          候选文本 text -> names
+---   text_cache_n : integer                          已缓存的文本数
 
-local char_cache = {} ---@type table<integer, string|boolean>
-local char_cache_n = 0 ---@type integer 已缓存的字符数
+---@class CharsetCommentCache
+---@field char_cache   table<integer, string|boolean>
+---@field char_cache_n integer
+---@field text_cache   table<string, string>
+---@field text_cache_n integer
+
+--- 缓存容量上限
 local CHAR_CACHE_MAX = 8192 ---@type integer 单字符缓存容量上限
-
---- 候选文本缓存：`text -> names`（数组）
-local text_cache = {} ---@type table<string, string[]>
-local text_cache_n = 0 ---@type integer 已缓存的字符数
 local TEXT_CACHE_MAX = 2048 ---@type integer 候选文本缓存容量上限
 
---- 清空表中约一半条目；counter 通过引用回写
+--- 清空表中约一半条目，返回修剪后的剩余计数
 ---@param tbl table 目标缓存表
----@param counter integer 用于回写剩余计数
----@local
-local function prune_half(tbl, counter)
-  local target = floor(counter / 2)
+---@param count integer 当前条目计数
+---@return integer 修剪后的剩余计数
+local function prune_half(tbl, count)
+  local target = floor(count / 2)
   if target <= 0 then
-    return
+    return count
   end
   local removed = 0
   for k in pairs(tbl) do
@@ -447,14 +449,14 @@ local function prune_half(tbl, counter)
       break
     end
   end
-  counter = counter - removed
+  return count - removed
 end
 
--- 查单个 code 所属字符集名；无匹配返回 false
+---@param cache CharsetCommentCache
 ---@param code integer 待查询的 Unicode 码位
----@return string | boolean name  字符集名；无匹配返回 false
-local function lookup_char(code)
-  local name = char_cache[code]
+---@return string | false name 单个 code 所属字符集名；无匹配返回 false
+local function lookup_char(cache, code)
+  local name = cache.char_cache[code]
   if name ~= nil then
     return name
   end
@@ -467,42 +469,59 @@ local function lookup_char(code)
     name = false
   end
 
-  if char_cache_n >= CHAR_CACHE_MAX then
-    prune_half(char_cache, char_cache_n)
+  if cache.char_cache_n >= CHAR_CACHE_MAX then
+    cache.char_cache_n = prune_half(cache.char_cache, cache.char_cache_n)
   end
-  if char_cache[code] == nil then
-    char_cache_n = char_cache_n + 1
+  if cache.char_cache[code] == nil then
+    cache.char_cache_n = cache.char_cache_n + 1
   end
-  char_cache[code] = name
+  cache.char_cache[code] = name
   return name
 end
 
--- 返回候选文本中出现的字符集名列表（按首次出现顺序、去重）
+---@param cache CharsetCommentCache
 ---@param text string 候选文本
----@return string[] name 字符集名列表（可能为空）
-local function match_charsets(text)
-  local cached = text_cache[text]
-  if cached then
+---@return string name 字符集名标注串（按首次出现顺序、去重，空格分隔；可能为空串）
+local function match_charsets(cache, text)
+  local len = utf8_len(text)
+  if len == 0 then
+    return ''
+  end
+  if len == 1 then
+    local name = lookup_char(cache, utf8_codepoint(text))
+    return name or '' -- name 是 string 或 false
+  end
+
+  local cached = cache.text_cache[text]
+  if cached ~= nil then
     return cached
   end
 
-  local seen, result = {}, {}
+  local seen, names = {}, {}
   for _, code in utf8_codes(text) do
-    local name = lookup_char(code)
+    local name = lookup_char(cache, code)
     if name and not seen[name] then
-      seen[name] = true
-      result[#result + 1] = name
+      seen[name] = true -- 去重
+      names[#names + 1] = name
     end
   end
 
-  if text_cache_n >= TEXT_CACHE_MAX then
-    prune_half(text_cache, text_cache_n)
+  local suffix = table.concat(names, ' ')
+
+  if cache.text_cache_n >= TEXT_CACHE_MAX then
+    cache.text_cache_n = prune_half(cache.text_cache, cache.text_cache_n)
   end
-  if text_cache[text] == nil then
-    text_cache_n = text_cache_n + 1
+  if cache.text_cache[text] == nil then
+    cache.text_cache_n = cache.text_cache_n + 1
   end
-  text_cache[text] = result
-  return result
+  cache.text_cache[text] = suffix
+  return suffix
+end
+
+---@param env Env
+M.init = function(env)
+  ---@diagnostic disable-next-line: inject-field
+  env._charset_comment_cache = { char_cache = {}, char_cache_n = 0, text_cache = {}, text_cache_n = 0 }
 end
 
 ---@param input Translation
@@ -511,17 +530,20 @@ end
 ---       librime-lua 版本中该赋值不生效，可改为 `cand.comment = ...`。
 M.func = function(input, env)
   local on = env.engine.context:get_option('charset_comment_filter')
+  ---@diagnostic disable-next-line: undefined-field
+  local cache = env._charset_comment_cache ---@type CharsetCommentCache
   for cand in input:iter() do
     if on then
-      local names = match_charsets(cand.text)
-      if #names > 0 then
-        local base = cand.comment or ''
-        local suffix = table.concat(names, ' ')
-        cand:get_genuine().comment = (base ~= '' and base .. ' ' or '') .. suffix
-      end
+      local suffix = match_charsets(cache, cand.text)
+      local comment = cand.comment or ''
+      cand:get_genuine().comment = (comment ~= '' and comment .. ' ' or '') .. suffix
     end
     yield(cand)
   end
+end
+
+M.fini = function(env)
+  env._charset_comment_cache = nil
 end
 
 return M

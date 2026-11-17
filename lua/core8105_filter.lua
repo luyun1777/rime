@@ -1,4 +1,5 @@
---- 只输出`core8105.dict.yaml` 中的常用汉字进行过滤
+--- 只输出在`core8105.dict.yaml` 中的常用汉字
+--- 只对CJK字符过滤，其他字符和魔法字符引导的候选不过滤
 --- 通过选项 `charset_filter` 控制开关
 
 local M = {}
@@ -8,7 +9,6 @@ local M = {}
 local charsets = {
   { name = '[部首增补]', first = 0x2E80, last = 0x2EFF },
   { name = '[康熙部首]', first = 0x2F00, last = 0x2FDF },
-  { name = '[笔画]', first = 0x31C0, last = 0x31EF },
   { name = '[扩A]', first = 0x3400, last = 0x4DBF },
   { name = '[基本区]', first = 0x4E00, last = 0x9FFF },
   { name = '[CJK兼容表意]', first = 0xF900, last = 0xFAFF },
@@ -28,7 +28,6 @@ local charsets = {
 ---
 --- `is_cjk` 的二分查找依赖严格升序；区间无效会导致匹配错误。
 ---
----@local
 --- do
 ---   for i = 1, #charsets do
 ---     local r = charsets[i]
@@ -51,6 +50,10 @@ local charsets = {
 ---   end
 --- end
 
+local utf8_char = utf8.char
+local utf8_codes = utf8.codes
+local floor = math.floor
+
 M.init = function(env)
   local ok, db = pcall(ReverseDb, 'build/core8105.reverse.bin')
   if ok and db then
@@ -61,10 +64,6 @@ M.init = function(env)
   env._cjk_cache = {}
   env._cjk_cache_db = env.coredb
 end
-
-local utf8_char = utf8.char
-local utf8_codes = utf8.codes
-local floor = math.floor
 
 ---@param code integer 待查询的 Unicode 码位
 ---@return boolean
@@ -102,7 +101,7 @@ local function in_coredb(code, env)
   if hit ~= nil then
     return hit
   end
-  hit = (coredb:lookup(utf8_char(code)) ~= '')
+  hit = coredb:lookup(utf8_char(code)) ~= ''
   cache[code] = hit
   return hit
 end
@@ -126,7 +125,16 @@ end
 ---@param input Translation
 ---@param env   Env
 M.func = function(input, env)
-  local on = env.engine.context:get_option('charset_filter')
+  local ctx = env.engine.context
+  local on = ctx:get_option('charset_filter')
+  -- 魔法字符（大写字母 / 符号引导）下的候选多为字母、符号或特殊内容，故直接透传
+  -- 注意：如果大写字母在方案中有正常用途，建议改为精确匹配，如 '^[NRU/]'
+  if on and ctx.input:match('^[%u/]') then
+    for cand in input:iter() do
+      yield(cand)
+    end
+    return
+  end
   for cand in input:iter() do
     if should_yield(cand.text, on, env) then
       yield(cand)

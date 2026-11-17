@@ -370,9 +370,8 @@ local ImmediateCalculation = true
 
 local function calculator_translator(input, seg, env)
   -- 获取 recognizer/patterns/expression 的第 2 个字符作为触发前缀（也就是获取等于号 = 或其他自定义字符）
-  local expression_keyword = env.engine.schema.config:get_string('recognizer/patterns/expression')
   local pattern = env.engine.schema.config:get_string('recognizer/patterns/expression')
-  expression_keyword = pattern and pattern:sub(2, 2) or '='
+  local expression_keyword = pattern and pattern:sub(2, 2) or '='
 
   -- 如果当前输入的是触发前缀，则尝试解析输入的 Lua 表达式，其中 seg:has_tag 判断是否是候选词；否则返回
   if not (seg:has_tag('expression') and expression_keyword ~= '' and input:sub(1, 1) == expression_keyword) then
