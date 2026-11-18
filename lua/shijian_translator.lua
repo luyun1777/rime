@@ -2762,7 +2762,7 @@ local function translator(input, seg, env)
       { os.date('%Y/%m/%d', target_ts), '〔日期〕' },
       { lunarJzl(ymdh), '〔公历⇉农历〕' },
       { Date2LunarDate(ymd) .. JQtest(ymd), '〔公历⇉农历〕' },
-      { CnDate_translator(os.date('%Y%m%d', now_ts)), '〔日期〕' },
+      { CnDate_translator(os.date('%Y%m%d', target_ts)), '〔日期〕' },
       { LunarDate2Date(ymd, false), '〔农历⇉公历〕' },
     }
     local leapDate = LunarToGregorianInfo(ymd, true)
